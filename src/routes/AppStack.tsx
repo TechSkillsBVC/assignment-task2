@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native'; // Add this import
 import { createStackNavigator } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/Events'; // Adjust the import path as needed
+import { RootStackParamList } from '../types/Events';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -21,7 +21,7 @@ export default function Routes() {
 
     return (
         <AuthenticationContext.Provider value={authenticationContextObj}>
-            <NavigationContainer>
+            <NavigationContainer> 
                 <Stack.Navigator
                     screenOptions={{
                         headerShown: false,

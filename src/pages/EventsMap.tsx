@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef, useEffect, useState } from 'react';
+import React, { useContext, useRef, useEffect } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -9,20 +9,21 @@ import customMapStyle from '../../map-style.json';
 import * as MapSettings from '../constants/MapSettings';
 import { AuthenticationContext } from '../context/AuthenticationContext';
 import mapMarkerImg from '../images/map-marker.png';
-import { Event } from '../types/Events'; // Ensure to import Event type
-import eventsData from '../../db.json'; // Load event data from db.json
-
+import { Event } from '../types/Events';
+import eventsData from '../../db.json';
 
 export default function EventsMap(props: StackScreenProps<any>) {
     const { navigation } = props;
     const authenticationContext = useContext(AuthenticationContext);
     const mapViewRef = useRef<MapView>(null);
 
-    // Load events from db.json using the correct property
-    const events: Event[] = eventsData.eventsData; // Change here from events to eventsData
+    
+    const events: Event[] = eventsData.eventsData.filter(event => {
+        const eventYear = new Date(event.dateTime).getFullYear();
+        return eventYear >= 2023;
+    });
 
     useEffect(() => {
-        // Reposition the map to fit all events and user location
         mapViewRef.current?.fitToCoordinates(
             events.map(({ position }) => ({
                 latitude: position.latitude,
@@ -33,22 +34,34 @@ export default function EventsMap(props: StackScreenProps<any>) {
     }, [events]);
 
     const handleNavigateToEventDetails = (event: Event) => {
-        // Navigate to EventDetails screen with the event data
         navigation.navigate('EventDetails', { event });
     };
 
     const handleNavigateToCreateEvent = () => {
-        // Navigate to the CreateEvent screen
-        navigation.navigate('CreateEvent');
+        // Navigate to CreateEvent
     };
 
     const handleLogout = async () => {
-        // Clear user data and navigate to login
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
             authenticationContext?.setValue(undefined);
             navigation.navigate('Login');
         });
     };
+
+   
+    const getOverlayColor = (event: Event) => {
+        const volunteersCount = event.volunteersIds.length;
+        const maxVolunteers = event.volunteersNeeded;
+
+        if (volunteersCount === 0) {
+            return 'rgba(0, 0, 255, 0.4)';
+        } else if (volunteersCount >= maxVolunteers) {
+            return 'rgba(128, 128, 128, 0.4)'; 
+        } else {
+            return 'rgba(255, 165, 0, 0.4)';  
+        }
+    };
+
 
     return (
         <View style={styles.container}>
@@ -72,7 +85,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                             latitude: event.position.latitude,
                             longitude: event.position.longitude,
                         }}
-                        onPress={() => handleNavigateToEventDetails(event)} // Pass event data to details screen
+                        onPress={() => handleNavigateToEventDetails(event)} 
                     >
                         <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
                     </Marker>
@@ -83,7 +96,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                 <Text style={styles.footerText}>{`${events.length} event(s) found`}</Text>
                 <RectButton
                     style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
-                    onPress={handleNavigateToCreateEvent} // Create event navigation
+                    onPress={handleNavigateToCreateEvent}
                 >
                     <Feather name="plus" size={20} color="#FFF" />
                 </RectButton>
