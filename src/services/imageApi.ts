@@ -17,7 +17,7 @@ import { getEnvironentVariable } from '../utils';
 const imageApi = axios.create({
     baseURL: 'https://api.imgbb.com/1',
     headers: { 'Content-Type': 'multipart/form-data' },
-    params: { key: getEnvironentVariable('IMGBB_API_KEY') },
+    params: { key: getEnvironentVariable('81d28dc26996812d4cfd6f782b772cb5') },
 });
 
 export const uploadImage = (imageBase64: string): Promise<AxiosResponse> => {
