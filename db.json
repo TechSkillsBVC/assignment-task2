@@ -48,7 +48,9 @@
         "EF-BZ00",
         "gpFfX6e",
         "Hr-40KW",
-        "elKKrm3"
+        "elKKrm3",
+        null,
+        null
       ]
     },
     {
@@ -184,6 +186,11 @@
       "email": "admin@2example.com",
       "password": "$2a$10$Jo7JkAVRDfRC6AK6e8xiFuuzO6KsQj.PJN9Oknr1X3qxCzkdEu2Ii",
       "id": "S7J5129"
+    },
+    {
+      "email": "admin@example.coa",
+      "password": "$2a$10$pXbdk6JqKfSlLGQShTXrwelTi23cH8aFmNNu4DrWkhgLScjWwTOxK",
+      "id": "FjManXz"
     }
   ]
 }

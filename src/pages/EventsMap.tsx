@@ -12,12 +12,13 @@ import mapMarkerImg from '../images/map-marker.png';
 import mapMarkerImgBlue from '../images/map-marker-blue.png';
 import mapMarkerImgGrey from '../images/map-marker-grey.png';
 import { fetchEvents } from '../services/api'; 
+import { EventDetails } from '../types/Event';
 
 export default function EventsMap(props: StackScreenProps<any>) {
     const { navigation } = props;
     const authenticationContext = useContext(AuthenticationContext);
     const mapViewRef = useRef<MapView>(null);
-    const [events, setEvents] = useState<event[]>([]);
+    const [events, setEvents] = useState<EventDetails[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [apiError, setApiError] = useState<string | null>(null);
 
@@ -45,6 +46,20 @@ export default function EventsMap(props: StackScreenProps<any>) {
 
     const handleNavigateToEventDetails = (eventId: string) => {
         navigation.navigate('EventsDetail',{eventId});
+    };
+
+    const getMarkerImage = (event: EventDetails) => {
+        const userId = authenticationContext?.user?.id;
+        const userHasVolunteered = event.volunteersIds.includes(userId);
+        const isEventFull = event.volunteersIds.length >= event.volunteersNeeded;
+
+        if (userHasVolunteered) {
+            return mapMarkerImgBlue; // Blue for already volunteered
+        } else if (isEventFull) {
+            return mapMarkerImgGrey; // Grey for event full
+        } else {
+            return mapMarkerImg; // Default for available spots
+        }
     };
 
     const handleLogout = async () => {
@@ -88,7 +103,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                             }}
                             onPress={() => handleNavigateToEventDetails(event.id)}
                         >
-                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
+                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={getMarkerImage(event)} />
                         </Marker>
                     );
                 })}

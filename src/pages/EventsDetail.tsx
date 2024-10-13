@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -8,6 +8,8 @@ import { useRoute } from '@react-navigation/native';
 import { fetchEvent } from '../services/api';
 import { EventDetails } from '../types/Event'; // Importing EventDetails interface
 import { useIsFocused } from '@react-navigation/native';
+import { AuthenticationContext } from '../context/AuthenticationContext';
+import { updateEvent } from '../services/api';
 
 export default function EventsDetail({ route, navigation }: StackScreenProps<any>) {
     const { eventId } = route.params; // Extract eventId from params
@@ -15,6 +17,8 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
     const [isLoading, setIsLoading] = useState<boolean>(true); // For showing the loading spinner
     const [apiError, setApiError] = useState<string | null>(null); // For handling API errors
     const isFocused = useIsFocused();
+    const authenticationContext = useContext(AuthenticationContext);
+    const userId = authenticationContext?.user?.id;
 
     useEffect(() => {
         if (isFocused) {
@@ -41,6 +45,20 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
         }
     }, [eventId, isFocused]);
 
+    const handleVolunteer = async () => {
+        if (event && !event.volunteersIds.includes(userId)) {
+            try {
+                const updatedEvent = {
+                    ...event,
+                    volunteersIds: [...event.volunteersIds, userId], // Add user to volunteer list
+                };
+            const response = await updateEvent(event.id, updatedEvent);
+            setEvent(response.data); // Update state with new volunteers
+            } catch (error) {
+                console.error('Error volunteering:', error);
+            }
+        }
+    };
     // If there's an API error, show an alert
     useEffect(() => {
         if (apiError) {
@@ -70,14 +88,12 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
         Alert.alert('Share', 'Sharing event details...');
     };
 
-    const handleVolunteer = () => {
-        Alert.alert('Volunteer', 'Volunteering for the event...');
-    };
-
     const handleReturnToMap = () => {
         navigation.navigate('EventsMap');
     };
 
+    const userHasVolunteered = event.volunteersIds.includes(userId);
+    const isEventFull = event.volunteersIds.length >= event.volunteersNeeded;
     const volunteersCount = event.volunteersIds.length;
 
     return (
@@ -106,9 +122,16 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
                 <RectButton style={[styles.button, styles.shareButton]} onPress={handleShare}>
                     <Text style={styles.buttonText}>Share</Text>
                 </RectButton>
+
+                {userHasVolunteered ? (
+                <Text style={[styles.button, styles.shareButton, styles.buttonText]}>You have already volunteered for this event.</Text>
+            ) : isEventFull ? (
+                <Text style={[styles.button, styles.fullButton, styles.buttonText]}> Sorry, this event is full.</Text>
+            ) : (
                 <RectButton style={[styles.button, styles.volunteerButton]} onPress={handleVolunteer}>
                     <Text style={styles.buttonText}>Volunteer</Text>
                 </RectButton>
+            )}
             </View>
 
             <MapView
@@ -204,6 +227,9 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    fullButton: {
+        backgroundColor: '#7C0A02',
     },
     shareButton: {
         backgroundColor: '#00A3FF',

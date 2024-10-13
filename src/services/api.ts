@@ -30,3 +30,7 @@ export const fetchEvents = (): Promise<AxiosResponse<EventDetails[]>> => {
 export const createEvent = (newEvent: EventDetails): Promise<AxiosResponse<EventDetails>> => {
     return api.post('/events', newEvent);
 };
+
+export const updateEvent = (eventId: string, updatedEvent: EventDetails): Promise<AxiosResponse<EventDetails>> => {
+    return api.put(`/events/${eventId}`, updatedEvent);
+};
