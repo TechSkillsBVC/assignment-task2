@@ -124,7 +124,9 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<{ E
                 </View>
                 <View style={styles.volunteerInfo}>
                     <Text style={styles.volunteerCount}>
-                        {volunteersCount} of {event.volunteersNeeded} Volunteer(s) needed
+                         {event.volunteersNeeded} Volunteer(s) needed </Text>
+                         <Text style={styles.volunteerCount}>
+                         {volunteersCount} Volunteer(s) signed up
                     </Text>
                 </View>
             </View>

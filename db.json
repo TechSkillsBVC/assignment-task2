@@ -1,19 +1,6 @@
 {
   "events": [
     {
-      "id": "e3c95682-870f-4080-a0d7-ae8e23e2534f",
-      "dateTime": "2022-01-11T21:30:00.000Z",
-      "description": "Past events should not be displayed in the map",
-      "name": "!!!Past Event!!!",
-      "organizerId": "gpFfX6e",
-      "position": {
-        "latitude": 51.105761,
-        "longitude": -114.106943
-      },
-      "volunteersNeeded": 1,
-      "volunteersIds": []
-    },
-    {
       "id": "98301b22-2b76-44f1-a8da-8c86c56b0367",
       "dateTime": "2023-01-11T23:30:00.000Z",
       "description": "The Memorial Park Library is looking for volunteers to help setting up the stage for our talented local artists.\n\nAny previous event producing experience is greatly appreciated.",
@@ -66,6 +53,40 @@
       "volunteersIds": [
         "EF-BZ00",
         "Q5bVHgP"
+      ]
+    },
+    {
+      "id": "45894ha-4543s-1234-56324",
+      "dateTime": "2024-02-12T12:30:00.000Z",
+      "description": "The Calgary Library is looking for Volunteers to help with the setup of the new library branch in the East Village.\n\nWe are looking for volunteers to help with the following tasks:\n- Unpacking and shelving books\n- Setting up the children's area\n- Setting up the computer area",
+      "imageUrl": "https://images.unsplash.com/photo-1582528617848-af3c559c4d71?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "name": "Library Set Up Day",
+      "organizerId": "EF-BZ00",
+      "position": {
+        "latitude": 51.04532733915629, 
+        "longitude": -114.05507459250612
+      },
+      "volunteersNeeded": 6,
+      "volunteersIds": [
+        "Q5bVHgP",
+        "elKKrm3"
+      ]
+    },
+    {
+      "id": "4fgb54-af45-ffg34-345",
+      "dateTime": "2024-12-24T12:30:00.000Z",
+      "description": "Hillhurst united church is looking for volunteers to help with the Christmas dinner for the homeless.\n\nWe are looking for volunteers to help with the following tasks:\n- Setting up the tables\n- Serving food\n- Cleaning up",
+      "imageUrl": "https://images.unsplash.com/photo-1601075720451-fba0825245bc?q=80&w=1288&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "name": "Christmas Dinner",
+      "organizerId": "EF-BZ00",
+      "position": {
+        "latitude": 51.05137778327406, 
+        "longitude": -114.09183771368588
+      },
+      "volunteersNeeded": 6,
+      "volunteersIds": [
+        "Q5bVHgP",
+        "elKKrm3"
       ]
     }
   ],
