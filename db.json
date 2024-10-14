@@ -48,9 +48,7 @@
         "EF-BZ00",
         "gpFfX6e",
         "Hr-40KW",
-        "elKKrm3",
-        null,
-        null
+        "elKKrm3"
       ]
     },
     {
@@ -171,26 +169,6 @@
       "password": "$2a$10$WdMhnN5qeA3RKlp4uNj23OAIByNltjO635hhxTMSWcV5BAbUNN4RC",
       "id": "ajY8pM2",
       "mobile": "(543) 905-5629"
-    },
-    {
-      "email": "admin@example.com",
-      "password": "$2a$10$lwu9A39hEbzZTmtZYAmM0eHaOJLucbhEXBYgiLLbtgtdCGZolg6L2",
-      "id": "ivlapOV"
-    },
-    {
-      "email": "john@example.com",
-      "password": "$2a$10$ldE6o6UdakVk4cA24hQgceAfId2rFZNlnYEtOcr1iG8lXYC09DbLi",
-      "id": "2RPnagP"
-    },
-    {
-      "email": "admin@2example.com",
-      "password": "$2a$10$Jo7JkAVRDfRC6AK6e8xiFuuzO6KsQj.PJN9Oknr1X3qxCzkdEu2Ii",
-      "id": "S7J5129"
-    },
-    {
-      "email": "admin@example.coa",
-      "password": "$2a$10$pXbdk6JqKfSlLGQShTXrwelTi23cH8aFmNNu4DrWkhgLScjWwTOxK",
-      "id": "FjManXz"
     }
   ]
 }

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker'; // For selecting images from the gallery
+import * as ImagePicker from 'expo-image-picker'; // For selecting images from the gallery
 import { RectButton } from 'react-native-gesture-handler';
 import { StackScreenProps } from '@react-navigation/stack';
 import { createEvent} from '../services/api'; // Assuming you have this service for uploading images
 import { uploadImage } from '../services/imageApi';
 import MapView, { Marker } from 'react-native-maps'; // For map and pin drop functionality
 import DateTimePicker from '@react-native-community/datetimepicker'; // For date and time picker
+import { EventDetails } from '../types/Event'; // Import the EventDetails interface
 
 export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     const [eventName, setEventName] = useState<string>('');
@@ -19,6 +20,7 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     const [volunteersNeeded, setVolunteersNeeded] = useState<string>(''); 
     const [selectedLocation, setSelectedLocation] = useState<{latitude: number, longitude: number} | null>(null); // For pin drop location
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [event, setEvent] = useState<EventDetails | null>(null);
 
     const handleCreateEvent = async () => {
         if (!eventName || !eventDescription || !eventDateTime || !eventImage || !volunteersNeeded || !selectedLocation || !organizerId) {
@@ -29,7 +31,7 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
         setIsSubmitting(true);
 
         try {
-            const newEvent = {
+            const newEvent: EventDetails = {
                 id: '', 
                 name: eventName,
                 description: eventDescription,
@@ -37,6 +39,7 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
                 imageUrl: eventImage,
                 organizerId: organizerId,
                 volunteersNeeded: parseInt(volunteersNeeded),
+                volunteersIds: [], // Add this line
                 position: {
                     latitude: selectedLocation.latitude,
                     longitude: selectedLocation.longitude,
@@ -58,39 +61,59 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     const handleReturnToMap = () => {
         navigation.goBack();
     };
+
     const handleImageUpload = async () => {
-        const result = await launchImageLibrary({ mediaType: 'photo', quality: 1 });
-
-        if (result.didCancel) return;
-        if (result.assets && result.assets.length > 0) {
-            const imageUri = result.assets[0].uri;
-
-            // Convert the image URI to Base64 format
-            const base64 = await getBase64FromUri(imageUri);
-            try {
-                const response = await uploadImage(base64);
-                setEventImage(response.data.data.display_url); // Update with the image URL returned by imgbb
-            } catch (error) {
-                Alert.alert('Error', 'Failed to upload the image. Please try again.');
-                console.error('Image upload error:', error);
+        try {
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            
+            if (permissionResult.granted === false) {
+                Alert.alert('Permission required', 'Permission to access camera roll is required!');
+                return;
             }
+    
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                quality: 1,
+                base64: true,
+            });
+    
+            if (!result.canceled && result.assets.length > 0) {
+                const imageUri = result.assets[0].uri;
+    
+                if (imageUri) {
+                    const base64 = await getBase64FromUri(imageUri); // Get base64 encoded string
+                    try {
+                        const response = await uploadImage(base64); // Assuming you have this API
+                        setEventImage(response.data.data.display_url); // Set the image URL returned by imgbb
+                    } catch (error) {
+                        console.error('Image upload error:', error);
+                        Alert.alert('Error', 'Failed to upload the image. Please try again.');
+                    }
+                } else {
+                    Alert.alert('Error', 'Failed to get the image URI. Please try again.');
+                }
+            }
+        } catch (error) {
+            console.error('Error opening image library:', error);
+            Alert.alert('Error', 'Failed to open image library. Please try again.');
         }
     };
 
     const getBase64FromUri = async (uri: string): Promise<string> => {
+    try {
         const response = await fetch(uri);
         const blob = await response.blob();
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                resolve(reader.result as string);
-            };
-            reader.onerror = () => {
-                reject(new Error('Failed to convert image to Base64'));
-            };
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
             reader.readAsDataURL(blob);
         });
-    };
+    } catch (error) {
+        console.error('Failed to convert image to Base64:', error);
+        throw new Error('Image conversion failed');
+    }
+};
 
     const handleMapPress = (e: any) => {
         setSelectedLocation(e.nativeEvent.coordinate);

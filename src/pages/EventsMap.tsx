@@ -22,6 +22,8 @@ export default function EventsMap(props: StackScreenProps<any>) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [apiError, setApiError] = useState<string | null>(null);
 
+    const loggedInUser = authenticationContext?.value?.name.first || 'Guest'; // Get logged in user’s name
+
     useEffect(() => {
         async function loadEvents() {
             setIsLoading(true);
@@ -49,8 +51,8 @@ export default function EventsMap(props: StackScreenProps<any>) {
     };
 
     const getMarkerImage = (event: EventDetails) => {
-        const userId = authenticationContext?.user?.id;
-        const userHasVolunteered = event.volunteersIds.includes(userId);
+        const userId = authenticationContext?.value?.id;
+        const userHasVolunteered = userId ? event.volunteersIds.includes(userId) : false;
         const isEventFull = event.volunteersIds.length >= event.volunteersNeeded;
 
         if (userHasVolunteered) {
@@ -71,6 +73,10 @@ export default function EventsMap(props: StackScreenProps<any>) {
 
     return (
         <View style={styles.container}>
+            <View style={styles.welcomeContainer}>
+                <Text style={styles.welcomeText}>Welcome: {loggedInUser}</Text>
+            </View>
+
             <MapView
                 ref={mapViewRef}
                 provider={PROVIDER_GOOGLE}
@@ -178,6 +184,20 @@ const styles = StyleSheet.create({
 
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    welcomeContainer: {
+        position: 'absolute',
+        top: 40,
+        left: 24,
+        backgroundColor: '#FFF',
+        padding: 10,
+        borderRadius: 8,
+        elevation: 3,
+    },
+    welcomeText: {
+        fontFamily: 'Nunito_700Bold',
+        fontSize: 16,
+        color: '#333',
     },
 });
 

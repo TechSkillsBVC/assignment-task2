@@ -16,7 +16,7 @@ const api = axios.create({
 });
 
 export const authenticateUser = (email: string, password: string): Promise<AxiosResponse> => {
-    return api.post(`/users`, { email, password });
+    return api.get(`/users`, { params: { email, password } });
 };
 
 export const fetchEvent = (eventId: string): Promise<AxiosResponse<EventDetails>> => {
@@ -25,6 +25,10 @@ export const fetchEvent = (eventId: string): Promise<AxiosResponse<EventDetails>
 
 export const fetchEvents = (): Promise<AxiosResponse<EventDetails[]>> => {
     return api.get('/events');
+};
+
+export const fetchUser = (userId: string): Promise<AxiosResponse> => {
+    return api.get(`/users/${userId}`);
 };
 
 export const createEvent = (newEvent: EventDetails): Promise<AxiosResponse<EventDetails>> => {

@@ -4,21 +4,27 @@ import { RectButton } from 'react-native-gesture-handler';
 import { StackScreenProps } from '@react-navigation/stack';
 import { Feather } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
-import { useRoute } from '@react-navigation/native';
 import { fetchEvent } from '../services/api';
 import { EventDetails } from '../types/Event'; // Importing EventDetails interface
 import { useIsFocused } from '@react-navigation/native';
 import { AuthenticationContext } from '../context/AuthenticationContext';
 import { updateEvent } from '../services/api';
+import { User } from '../types/User';
+import { fetchUser } from '../services/api';
 
-export default function EventsDetail({ route, navigation }: StackScreenProps<any>) {
+interface RouteParams {
+    eventId: string;
+}
+
+export default function EventsDetail({ route, navigation }: StackScreenProps<{ EventsDetail: RouteParams }, 'EventsDetail'>) {
     const { eventId } = route.params; // Extract eventId from params
     const [event, setEvent] = useState<EventDetails | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true); // For showing the loading spinner
     const [apiError, setApiError] = useState<string | null>(null); // For handling API errors
     const isFocused = useIsFocused();
     const authenticationContext = useContext(AuthenticationContext);
-    const userId = authenticationContext?.user?.id;
+    const userId = authenticationContext?.value?.id;
+    const [organizer, setOrganizer] = useState<User | null>(null);
 
     useEffect(() => {
         if (isFocused) {
@@ -29,6 +35,11 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
                     try {
                         const response = await fetchEvent(eventId); // Fetch event data
                         setEvent(response.data);
+
+                        if (response.data.organizerId) {
+                            const organizerResponse = await fetchUser(response.data.organizerId);
+                            setOrganizer(organizerResponse.data);
+                        }
                     } catch (error) {
                         console.error('Failed to load event details:', error);
                         setApiError('Unable to load event details. Please try again.');
@@ -46,7 +57,7 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
     }, [eventId, isFocused]);
 
     const handleVolunteer = async () => {
-        if (event && !event.volunteersIds.includes(userId)) {
+        if (event && userId && !event.volunteersIds.includes(userId)) {
             try {
                 const updatedEvent = {
                     ...event,
@@ -89,10 +100,10 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
     };
 
     const handleReturnToMap = () => {
-        navigation.navigate('EventsMap');
+        navigation.navigate('EventsMap' as never);
     };
 
-    const userHasVolunteered = event.volunteersIds.includes(userId);
+    const userHasVolunteered = userId ? event.volunteersIds.includes(userId) : false;
     const isEventFull = event.volunteersIds.length >= event.volunteersNeeded;
     const volunteersCount = event.volunteersIds.length;
 
@@ -102,7 +113,7 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
 
             <View style={styles.detailsContainer}>
                 <Text style={styles.title}>{event.name}</Text>
-                <Text style={styles.organizer}>organized by {event.organizerId}</Text>
+                <Text style={styles.organizer}> organized by {organizer ? `${organizer.name.first} ${organizer.name.last}` : 'Loading...'}</Text>
                 <Text style={styles.description}>{event.description}</Text>
             </View>
 
@@ -124,16 +135,19 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
                 </RectButton>
 
                 {userHasVolunteered ? (
-                <Text style={[styles.button, styles.shareButton, styles.buttonText]}>You have already volunteered for this event.</Text>
+                <RectButton style={[styles.button, styles.shareButton]}>
+                    <Text style={styles.buttonText}>You have already volunteered for this event.</Text>
+                </RectButton>
             ) : isEventFull ? (
-                <Text style={[styles.button, styles.fullButton, styles.buttonText]}> Sorry, this event is full.</Text>
+                <RectButton style={[styles.button, styles.fullButton]}>
+                    <Text style={styles.buttonText}> Sorry, this event is full.</Text>
+                </RectButton>
             ) : (
                 <RectButton style={[styles.button, styles.volunteerButton]} onPress={handleVolunteer}>
                     <Text style={styles.buttonText}>Volunteer</Text>
                 </RectButton>
             )}
             </View>
-
             <MapView
                 style={styles.map}
                 initialRegion={{
@@ -150,16 +164,9 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<any
                     title={event.name}
                 />
             </MapView>
-
-            <TouchableOpacity style={styles.directionsButton}>
-                <Text style={styles.directionsButtonText}>Get Directions to Event</Text>
+            <TouchableOpacity style={styles.directionsButton} onPress={handleReturnToMap}>
+                <Text style={styles.directionsButtonText}>Return to Map</Text>
             </TouchableOpacity>
-
-            <View style={styles.actionButtons}>
-                <RectButton style={[styles.button, styles.shareButton]} onPress={handleReturnToMap}>
-                    <Text style={styles.buttonText}>Return To Map</Text>
-                </RectButton>
-            </View>
         </View>
     );
 }
@@ -229,12 +236,30 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     fullButton: {
+        flex: 1,
+        padding: 15,
+        margin: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#7C0A02',
     },
     shareButton: {
+        flex: 1,
+        padding: 15,
+        margin: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#00A3FF',
     },
     volunteerButton: {
+        flex: 1,
+        padding: 15,
+        margin: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#FF7A00',
     },
     buttonText: {
@@ -263,4 +288,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-});
+}); 
