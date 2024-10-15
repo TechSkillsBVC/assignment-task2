@@ -6,7 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     slug: 'volunteam',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/icon.png',
+    icon: './assets/icon.png', // Ensure this file exists
     splash: {
         image: './assets/splash.png',
         resizeMode: 'cover',
@@ -18,6 +18,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     assetBundlePatterns: ['**/*'],
     ios: {
         supportsTablet: true,
+        infoPlist: {
+            LSApplicationQueriesSchemes: ['tel', 'sms', 'maps'],
+        },
+    },
+    android: {
+        // Remove the adaptiveIcon configuration
+        permissions: [
+            "CALL_PHONE",
+            "SEND_SMS",
+            "ACCESS_FINE_LOCATION",
+            "ACCESS_COARSE_LOCATION"
+        ],
     },
     web: {
         favicon: './assets/favicon.png',
