@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
-import * as ImagePicker from 'expo-image-picker'; // For selecting images from the gallery
-import { RectButton } from 'react-native-gesture-handler';
 import { StackScreenProps } from '@react-navigation/stack';
-import { createEvent} from '../services/api'; // Assuming you have this service for uploading images
-import { uploadImage } from '../services/imageApi';
+import { Picker } from '@react-native-picker/picker'; // For dropdown picker
+import { createEvent, fetchUsers} from '../services/api'; // Assuming you have this service for uploading images
 import MapView, { Marker } from 'react-native-maps'; // For map and pin drop functionality
 import DateTimePicker from '@react-native-community/datetimepicker'; // For date and time picker
 import { EventDetails } from '../types/Event'; // Import the EventDetails interface
@@ -21,6 +19,19 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     const [selectedLocation, setSelectedLocation] = useState<{latitude: number, longitude: number} | null>(null); // For pin drop location
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [event, setEvent] = useState<EventDetails | null>(null);
+    const [users, setUsers] = useState<{ id: string, name: string }[]>([]);
+
+    useEffect(() => {
+        const loadUsers = async () => {
+            try {
+                const usersData = await fetchUsers(); // API call to fetch users
+                setUsers(usersData);
+            } catch (error) {
+                console.error('Failed to load users:', error);
+            }
+        };
+        loadUsers();
+    }, []);
 
     const handleCreateEvent = async () => {
         if (!eventName || !eventDescription || !eventDateTime || !eventImage || !volunteersNeeded || !selectedLocation || !organizerId) {
@@ -36,10 +47,10 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
                 name: eventName,
                 description: eventDescription,
                 dateTime: eventDateTime.toISOString(),
-                imageUrl: eventImage,
+                imageUrl: eventImage,  // Use the image URL provided by the user
                 organizerId: organizerId,
                 volunteersNeeded: parseInt(volunteersNeeded),
-                volunteersIds: [], // Add this line
+                volunteersIds: [], 
                 position: {
                     latitude: selectedLocation.latitude,
                     longitude: selectedLocation.longitude,
@@ -58,63 +69,6 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
         }
     };
 
-    const handleReturnToMap = () => {
-        navigation.goBack();
-    };
-
-    const handleImageUpload = async () => {
-        try {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            
-            if (permissionResult.granted === false) {
-                Alert.alert('Permission required', 'Permission to access camera roll is required!');
-                return;
-            }
-    
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                quality: 1,
-                base64: true,
-            });
-    
-            if (!result.canceled && result.assets.length > 0) {
-                const imageUri = result.assets[0].uri;
-    
-                if (imageUri) {
-                    const base64 = await getBase64FromUri(imageUri); // Get base64 encoded string
-                    try {
-                        const response = await uploadImage(base64); // Assuming you have this API
-                        setEventImage(response.data.data.display_url); // Set the image URL returned by imgbb
-                    } catch (error) {
-                        console.error('Image upload error:', error);
-                        Alert.alert('Error', 'Failed to upload the image. Please try again.');
-                    }
-                } else {
-                    Alert.alert('Error', 'Failed to get the image URI. Please try again.');
-                }
-            }
-        } catch (error) {
-            console.error('Error opening image library:', error);
-            Alert.alert('Error', 'Failed to open image library. Please try again.');
-        }
-    };
-
-    const getBase64FromUri = async (uri: string): Promise<string> => {
-    try {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = (error) => reject(error);
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        console.error('Failed to convert image to Base64:', error);
-        throw new Error('Image conversion failed');
-    }
-};
-
     const handleMapPress = (e: any) => {
         setSelectedLocation(e.nativeEvent.coordinate);
     };
@@ -129,6 +83,20 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Add Event</Text>
+
+            <View style={styles.pickerContainer}>
+                <Text style={styles.label}>Organizer</Text>
+                <Picker
+                    selectedValue={organizerId}
+                    onValueChange={(itemValue) => setOrganizerId(itemValue)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Select Organizer" value="" />
+                    {users.map((user) => (
+                        <Picker.Item key={user.id} label={user.name} value={user.id} />
+                    ))}
+                </Picker>
+            </View>
 
             <TextInput
                 style={styles.input}
@@ -166,23 +134,26 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
                     onChange={handleDateChange}
                 />
             )}
-            <TouchableOpacity style={styles.imageUploadContainer} onPress={handleImageUpload}>
-                <View style={styles.imagePreview}>
-                    {eventImage ? (
-                        <Image source={{ uri: eventImage }} style={styles.image} />
-                    ) : (
-                        <Text>Upload Image</Text>
-                    )}
-                </View>
-                {imageInfo && (
-                    <Text style={styles.imageInfo}>{imageInfo}</Text>
-                )}
-            </TouchableOpacity>
+
+            {/* TextInput for Image URL */}
+            <TextInput
+                style={styles.input}
+                placeholder="Image URL"
+                value={eventImage}
+                onChangeText={setEventImage}
+            />
+
+            {/* Optional: Display a preview of the image if a URL is entered */}
+            {eventImage ? (
+                <Image source={{ uri: eventImage }} style={styles.imagePreview} />
+            ) : null}
+
+            {/* Organizer Picker Dropdown */}
 
             <MapView
                 style={styles.map}
                 initialRegion={{
-                    latitude: 51.0447, // Default to Calgary or any other region
+                    latitude: 51.0447, 
                     longitude: -114.0719,
                     latitudeDelta: 0.0922,
                     longitudeDelta: 0.0421,
@@ -200,7 +171,7 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
                 </TouchableOpacity>
             </View>
             <View style={styles.actionButtons}>
-                <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={handleReturnToMap} disabled={isSubmitting}>
+                <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={() => navigation.navigate('EventsMap',{refresh:true})} disabled={isSubmitting}>
                     <Text style={styles.buttonText}>Cancel</Text>
                 </TouchableOpacity>
             </View>
@@ -233,7 +204,7 @@ const styles = StyleSheet.create({
     },
     imagePreview: {
         width: '100%',
-        height: 200,
+        height: 100,
         borderWidth: 1,
         borderColor: '#ddd',
         justifyContent: 'center',
@@ -252,7 +223,7 @@ const styles = StyleSheet.create({
     },
     map: {
         width: '100%',
-        height: 200,
+        height: 100,
         marginVertical: 10,
         borderRadius: 10,
     },
@@ -275,5 +246,19 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    pickerContainer: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#FFFFFF',
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    picker: {
+        height: 50,
+        borderRadius: 10,
     },
 });

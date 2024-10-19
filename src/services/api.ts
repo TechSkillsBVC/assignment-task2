@@ -38,3 +38,18 @@ export const createEvent = (newEvent: EventDetails): Promise<AxiosResponse<Event
 export const updateEvent = (eventId: string, updatedEvent: EventDetails): Promise<AxiosResponse<EventDetails>> => {
     return api.put(`/events/${eventId}`, updatedEvent);
 };
+
+export const fetchUsers = async (): Promise<{ id: string; name: string }[]> => {
+    try {
+        const response: AxiosResponse<{ id: string; name: { first: string; last: string } }[]> = await api.get('/users');
+        
+        // Map the response to combine the nested first and last names
+        return response.data.map((user) => ({
+            id: user.id,
+            name: `${user.name.first} ${user.name.last}`, // Accessing nested first and last names
+        }));
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error; // Throw error so it can be caught by the calling component
+    }
+};

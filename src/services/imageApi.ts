@@ -9,7 +9,7 @@ import { getEnvironentVariable } from '../utils';
 //
 // To run the app in your local environment, you will need to set the IMGBB_API_KEY
 // when starting the app using:
-// 'IMGBB_API_KEY="insert_your_api_key_here" npx expo start'
+// 'IMGBB_API_KEY=81d28dc26996812d4cfd6f782b772cb5 npx expo start'
 //
 // When creating your app build or publishing, do not forget to run 'eas secret:push' command
 // to import your secret values to EAS.
@@ -22,7 +22,8 @@ const imageApi = axios.create({
 
 export const uploadImage = (imageBase64: string): Promise<AxiosResponse> => {
     const data = new FormData();
-    data.append('image', imageBase64);
+    const cleanBase64 = imageBase64.split(',')[1];
+    data.append('image', cleanBase64);
 
     return imageApi.post('/upload', data);
 };

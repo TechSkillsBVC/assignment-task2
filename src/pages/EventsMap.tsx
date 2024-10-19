@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
+import { useIsFocused } from '@react-navigation/native';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
@@ -21,6 +22,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
     const [events, setEvents] = useState<EventDetails[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [apiError, setApiError] = useState<string | null>(null);
+    const isFocused = useIsFocused();
 
     const loggedInUser = authenticationContext?.value?.name.first || 'Guest'; // Get logged in user’s name
 
@@ -40,7 +42,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
         }
 
         loadEvents();
-    }, []);
+    }, [isFocused]);
 
     const handleNavigateToCreateEvent = () => {
     navigation.navigate('CreateEvents')

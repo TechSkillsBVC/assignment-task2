@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ActivityIndicator,ScrollView } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { StackScreenProps } from '@react-navigation/stack';
 import { Feather } from '@expo/vector-icons';
@@ -108,7 +108,7 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<{ E
     const volunteersCount = event.volunteersIds.length;
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
 
             <View style={styles.detailsContainer}>
@@ -169,7 +169,7 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<{ E
             <TouchableOpacity style={styles.directionsButton} onPress={handleReturnToMap}>
                 <Text style={styles.directionsButtonText}>Return to Map</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 }
 
