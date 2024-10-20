@@ -116,6 +116,20 @@
         "latitude": 51.04433287241039,
         "longitude": -114.05148954129737
       }
+    },
+    {
+      "id": "bTx-QhO",
+      "name": "Food Bank at the Curling Rink",
+      "description": "Helping out at the curling rink",
+      "dateTime": "2024-11-09T10:00:00.000Z",
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgNr2dmi7RZsIHydhA1E0XjxO7mk-4ExALSw&s",
+      "organizerId": "3UN3-2L",
+      "volunteersNeeded": 10,
+      "volunteersIds": [],
+      "position": {
+        "latitude": 51.05820550092059,
+        "longitude": -114.06964832099919
+      }
     }
   ],
   "users": [
