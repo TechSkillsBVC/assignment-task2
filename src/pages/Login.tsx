@@ -44,9 +44,11 @@ export default function Login({ navigation }: StackScreenProps<any>) {
         if (accessTokenIsValid && authenticationContext?.value) navigation.navigate('EventsMap');
     }, [accessTokenIsValid]);
 
+
     const handleAuthentication = () => {
         if (formIsValid()) {
             setIsAuthenticating(true);
+
             api.authenticateUser(sanitizeEmail(email), password)
                 .then((response) => {
                     setInCache('userInfo', response.data.user);
@@ -64,6 +66,7 @@ export default function Login({ navigation }: StackScreenProps<any>) {
                     }
                     setIsAuthenticating(false);
                 });
+
         }
     };
 
