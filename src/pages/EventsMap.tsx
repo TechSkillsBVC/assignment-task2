@@ -19,7 +19,12 @@ export default function EventsMap(props: StackScreenProps<any>) {
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
+    const currentUserId = "EF-BZ00"; // Hardcoded user ID
+    
+    const handleNavigateToEventDetails = (eventId: string, currentUserId: string) => {
+        navigation.navigate('EventDetails', { eventId, currentUserId });
+    };
+        
 
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
@@ -28,8 +33,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
         });
     };
 
-    const currentUserId = "EF-BZ00"; // Hardcoded user ID
-
+    
     return (
         <View style={styles.container}>
             <MapView
@@ -75,7 +79,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                                 latitude: event.position.latitude,
                                 longitude: event.position.longitude,
                             }}
-                            onPress={handleNavigateToEventDetails}
+                             onPress={() => handleNavigateToEventDetails(event.id, currentUserId)} // Pass the event ID
                         >
                             <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={markerImage} />
                         </Marker>
