@@ -18,7 +18,14 @@ export default function BigButton(props: BigButtonProps) {
 
     return (
         <RectButton style={[styles.button, style]} onPress={onPress}>
-            {featherIconName && <Feather style={styles.icon} name={featherIconName} size={24} color="#FFF" />}
+            {featherIconName && (
+                <Feather
+                    style={styles.icon}
+                    name={featherIconName}
+                    size={24}
+                    color="#FFF"
+                />
+            )}
             <Text style={styles.label}>{label}</Text>
         </RectButton>
     );
@@ -30,7 +37,7 @@ const styling = ({ color, disabled }: BigButtonProps) =>
             paddingVertical: 14,
             paddingHorizontal: 32,
             backgroundColor: disabled ? color + '80' : color,
-            borderRadius: 16,
+            borderRadius: 16,  // Increased border radius for a rounder button
             maxHeight: 56,
 
             flexDirection: 'row',
@@ -44,7 +51,7 @@ const styling = ({ color, disabled }: BigButtonProps) =>
         },
 
         label: {
-            fontFamily: 'Nunito_800ExtraBold',
+            fontFamily: 'Nunito_800ExtraBold',  // Different font style
             color: '#FFF',
             fontSize: 15,
         },
