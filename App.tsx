@@ -12,6 +12,7 @@ import {
 import AppStack from './src/routes/AppStack';
 import { StatusBar } from 'expo-status-bar';
 
+
 export default function App() {
     const [fontsLoaded] = useFonts({
         Nunito_400Regular,
@@ -31,5 +32,6 @@ export default function App() {
                 </ActionSheetProvider>
             </>
         );
+        
     }
 }
