@@ -22,6 +22,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     web: {
         favicon: './assets/favicon.png',
     },
+    
     plugins: [
         [
             'expo-image-picker',
@@ -37,4 +38,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
         IMGBB_API_KEY: process.env.IMGBB_API_KEY,
     },
+    
 });
