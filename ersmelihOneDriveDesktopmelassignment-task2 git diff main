@@ -1,0 +1,415 @@
+[1mdiff --git a/app.config.ts b/app.config.ts[m
+[1mindex 5c370e3..c1c4e32 100644[m
+[1m--- a/app.config.ts[m
+[1m+++ b/app.config.ts[m
+[36m@@ -22,6 +22,7 @@[m [mexport default ({ config }: ConfigContext): ExpoConfig => ({[m
+     web: {[m
+         favicon: './assets/favicon.png',[m
+     },[m
+[32m+[m[41m    [m
+     plugins: [[m
+         [[m
+             'expo-image-picker',[m
+[36m@@ -37,4 +38,5 @@[m [mexport default ({ config }: ConfigContext): ExpoConfig => ({[m
+         },[m
+         IMGBB_API_KEY: process.env.IMGBB_API_KEY,[m
+     },[m
+[32m+[m[41m    [m
+ });[m
+[1mdiff --git a/db.json b/db.json[m
+[1mindex d035752..7fc2bec 100644[m
+[1m--- a/db.json[m
+[1m+++ b/db.json[m
+[36m@@ -1,161 +1,179 @@[m
+ {[m
+[31m-    "events": [[m
+[31m-        {[m
+[31m-            "id": "e3c95682-870f-4080-a0d7-ae8e23e2534f",[m
+[31m-            "dateTime": "2022-01-11T21:30:00.000Z",[m
+[31m-            "description": "Past events should not be displayed in the map",[m
+[31m-            "name": "!!!Past Event!!!",[m
+[31m-            "organizerId": "gpFfX6e",[m
+[31m-            "position": {[m
+[31m-                "latitude": 51.105761,[m
+[31m-                "longitude": -114.106943[m
+[31m-            },[m
+[31m-            "volunteersNeeded": 1,[m
+[31m-            "volunteersIds": [][m
+[31m-        },[m
+[31m-        {[m
+[31m-            "id": "98301b22-2b76-44f1-a8da-8c86c56b0367",[m
+[31m-            "dateTime": "2023-01-11T23:30:00.000Z",[m
+[31m-            "description": "The Memorial Park Library is looking for volunteers to help setting up the stage for our talented local artists.\n\nAny previous event producing experience is greatly appreciated.",[m
+[31m-            "imageUrl": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=max&w=1080&q=80",[m
+[31m-            "name": "Downtown Vibe Live Music",[m
+[31m-            "organizerId": "EF-BZ00",[m
+[31m-            "position": {[m
+[31m-                "latitude": 51.04112,[m
+[31m-                "longitude": -114.069325[m
+[31m-            },[m
+[31m-            "volunteersNeeded": 4,[m
+[31m-            "volunteersIds": ["3UN3-2L", "gpFfX6e", "tRHltUh", "ajY8pM2"][m
+[31m-        },[m
+[31m-        {[m
+[31m-            "id": "d7b8ea73-ba2c-4fc3-9348-9814076124bd",[m
+[31m-            "dateTime": "2023-02-04T16:30:00.000Z",[m
+[31m-            "description": "At the Flames Community Arena, we are offering a free skating lessons day with volunteer instructors.\n\nWe expect volunteer intructors to:\n- be reliable and enthusiastic\n- take initiative and be innovative\n- commit to a minimum of 4 hours of volunteering.",[m
+[31m-            "imageUrl": "https://images.unsplash.com/photo-1528828465856-0ac27ee2aeb3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=max&w=1080&q=80",[m
+[31m-            "name": "Free Skating Lessons Day",[m
+[31m-            "organizerId": "3UN3-2L",[m
+[31m-            "position": {[m
+[31m-                "latitude": 51.01222958257112,[m
+[31m-                "longitude": -114.11677222698927[m
+[31m-            },[m
+[31m-            "volunteersNeeded": 10,[m
+[31m-            "volunteersIds": ["EF-BZ00", "gpFfX6e", "Hr-40KW", "elKKrm3"][m
+[31m-        },[m
+[31m-        {[m
+[31m-            "id": "d1a6b9ea-877d-4711-b8d7-af8f1bce4d29",[m
+[31m-            "dateTime": "2023-01-06T15:30:00.000Z",[m
+[31m-            "description": "The Elboya School is looking for volunteers to teach computer programming to kids from grade 5 to 7.\n\nREQUIREMENTS:\n* Previous programming experience.\n* 4 hour commitment, from 8:30 AM to 12:30 AM.",[m
+[31m-            "imageUrl": "https://images.unsplash.com/photo-1584697964328-b1e7f63dca95?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=max&w=1080&q=80",[m
+[31m-            "name": "Kids Programming Day",[m
+[31m-            "organizerId": "Hr-40KW",[m
+[31m-            "position": {[m
+[31m-                "latitude": 51.010801915407036,[m
+[31m-                "longitude": -114.07823592424393[m
+[31m-            },[m
+[31m-            "volunteersNeeded": 2,[m
+[31m-            "volunteersIds": ["EF-BZ00", "Q5bVHgP"][m
+[31m-        }[m
+[31m-    ],[m
+[31m-    "users": [[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Ulla",[m
+[31m-                "last": "Ulriksen"[m
+[31m-            },[m
+[31m-            "email": "ulla.ulriksen@example.com",[m
+[31m-            "password": "$2a$10$hd96yCeGW794sN8OL7SeMeOGPVEY.wiQDcsHbf5p.Ngtjx93iqjIG",[m
+[31m-            "id": "EF-BZ00",[m
+[31m-            "mobile": "(910) 862-3167"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Yasemin",[m
+[31m-                "last": "Akyüz"[m
+[31m-            },[m
+[31m-            "email": "yasemin.akyuz@example.com",[m
+[31m-            "password": "$2a$10$8RRvGY70JK5/Y5jPnltkXOU/wYLhpRcbU48rYzNYx.XDFfqsnkYHm",[m
+[31m-            "id": "Q5bVHgP",[m
+[31m-            "mobile": "(243) 359-9759"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Luigi",[m
+[31m-                "last": "Carluccio"[m
+[31m-            },[m
+[31m-            "email": "luigi@carluccio.it",[m
+[31m-            "password": "$2a$10$riZrILdnrgZfM1eymhR6leGdp9Pe3s1MbL6ig5HegPf0QcYImfV22",[m
+[31m-            "id": "gpFfX6e",[m
+[31m-            "mobile": "(171) 946-2538"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "John",[m
+[31m-                "last": "Silva"[m
+[31m-            },[m
+[31m-            "email": "john@silva.com.br",[m
+[31m-            "password": "$2a$10$CjzilCJ3NAbs29mPjEJik.gGaD/P4X2.TO5oO7icjSi6lC9Hy..X2",[m
+[31m-            "id": "3UN3-2L",[m
+[31m-            "mobile": "(563) 589-2999"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Elif",[m
+[31m-                "last": "Akşit"[m
+[31m-            },[m
+[31m-            "email": "elif.aksit@example.com",[m
+[31m-            "password": "$2a$10$q/LzX.qHhX417ltWwzIvye5kqF331m7N/6COGHYbP9QM5QGKxCGXy",[m
+[31m-            "id": "t1aL2Xq",[m
+[31m-            "mobile": "(636) 336-9413"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Anne",[m
+[31m-                "last": "Van Wingerden"[m
+[31m-            },[m
+[31m-            "email": "anne.vanwingerden@example.com",[m
+[31m-            "password": "$2a$10$HmUi8GiOInsWD0Q9ztz.B.5CnXuNb3UDZw4o3T07O2I5O.dMuQj/S",[m
+[31m-            "id": "tRHltUh",[m
+[31m-            "mobile": "(306) 805-5821"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Gisele",[m
+[31m-                "last": "Oliveira"[m
+[31m-            },[m
+[31m-            "email": "gisele.oliveira@example.com",[m
+[31m-            "password": "$2a$10$TSTk7KQzNKY21SejLuRTKuSJ4JE1tEKdfL7V8D8Qm4Gc/xDPuQ1nu",[m
+[31m-            "id": "3Ohd8sD",[m
+[31m-            "mobile": "(905) 491-1184"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Sara",[m
+[31m-                "last": "Barnett"[m
+[31m-            },[m
+[31m-            "email": "sara.barnett@example.com",[m
+[31m-            "password": "$2a$10$j1e0tTcuBdPmvA9lOh7GSOouun3t6e4oyMk4qewjtXX5kPizyAYZ.",[m
+[31m-            "id": "Hr-40KW",[m
+[31m-            "mobile": "(710) 271-3339"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Azuma",[m
+[31m-                "last": "Gamez"[m
+[31m-            },[m
+[31m-            "password": "$2a$10$nG1wSQFp7.bL1YBnqaE2.uhS8Tt8kzYu6B14NZCImf50SayOzcj8C",[m
+[31m-            "email": "azuma.gamez@example.com",[m
+[31m-            "id": "elKKrm3",[m
+[31m-            "mobile": "(605) 964-2338"[m
+[31m-        },[m
+[31m-        {[m
+[31m-            "name": {[m
+[31m-                "first": "Eva",[m
+[31m-                "last": "Young"[m
+[31m-            },[m
+[31m-            "email": "eva.young@example.com",[m
+[31m-            "password": "$2a$10$WdMhnN5qeA3RKlp4uNj23OAIByNltjO635hhxTMSWcV5BAbUNN4RC",[m
+[31m-            "id": "ajY8pM2",[m
+[31m-            "mobile": "(543) 905-5629"[m
+[31m-        }[m
+[31m-    ][m
+[31m-}[m
+[32m+[m[32m  "eventsData": [[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "id": "e3c95682-870f-4080-a0d7-ae8e23e2534f",[m
+[32m+[m[32m      "dateTime": "2022-01-11T21:30:00.000Z",[m
+[32m+[m[32m      "description": "Past events should not be displayed in the map",[m
+[32m+[m[32m      "name": "!!!Past Event!!!",[m
+[32m+[m[32m      "organizerId": "gpFfX6e",[m
+[32m+[m[32m      "position": {[m
+[32m+[m[32m        "latitude": 51.105761,[m
+[32m+[m[32m        "longitude": -114.106943[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "volunteersNeeded": 1,[m
+[32m+[m[32m      "volunteersIds": [][m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "id": "98301b22-2b76-44f1-a8da-8c86c56b0367",[m
+[32m+[m[32m      "dateTime": "2023-01-11T23:30:00.000Z",[m
+[32m+[m[32m      "description": "The Memorial Park Library is looking for volunteers to help setting up the stage for our talented local artists.\n\nAny previous event producing experience is greatly appreciated.",[m
+[32m+[m[32m      "imageUrl": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=max&w=1080&q=80",[m
+[32m+[m[32m      "name": "Downtown Vibe Live Music",[m
+[32m+[m[32m      "organizerId": "EF-BZ00",[m
+[32m+[m[32m      "position": {[m
+[32m+[m[32m        "latitude": 51.04112,[m
+[32m+[m[32m        "longitude": -114.069325[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "volunteersNeeded": 4,[m
+[32m+[m[32m      "volunteersIds": [[m
+[32m+[m[32m        "3UN3-2L",[m
+[32m+[m[32m        "gpFfX6e",[m
+[32m+[m[32m        "tRHltUh",[m
+[32m+[m[32m        "ajY8pM2"[m
+[32m+[m[32m      ][m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "id": "d7b8ea73-ba2c-4fc3-9348-9814076124bd",[m
+[32m+[m[32m      "dateTime": "2023-02-04T16:30:00.000Z",[m
+[32m+[m[32m      "description": "At the Flames Community Arena, we are offering a free skating lessons day with volunteer instructors.\n\nWe expect volunteer intructors to:\n- be reliable and enthusiastic\n- take initiative and be innovative\n- commit to a minimum of 4 hours of volunteering.",[m
+[32m+[m[32m      "imageUrl": "https://images.unsplash.com/photo-1528828465856-0ac27ee2aeb3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=max&w=1080&q=80",[m
+[32m+[m[32m      "name": "Free Skating Lessons Day",[m
+[32m+[m[32m      "organizerId": "3UN3-2L",[m
+[32m+[m[32m      "position": {[m
+[32m+[m[32m        "latitude": 51.01222958257112,[m
+[32m+[m[32m        "longitude": -114.11677222698927[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "volunteersNeeded": 10,[m
+[32m+[m[32m      "volunteersIds": [[m
+[32m+[m[32m        "EF-BZ00",[m
+[32m+[m[32m        "gpFfX6e",[m
+[32m+[m[32m        "Hr-40KW",[m
+[32m+[m[32m        "elKKrm3"[m
+[32m+[m[32m      ][m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "id": "d1a6b9ea-877d-4711-b8d7-af8f1bce4d29",[m
+[32m+[m[32m      "dateTime": "2023-01-06T15:30:00.000Z",[m
+[32m+[m[32m      "description": "The Elboya School is looking for volunteers to teach computer programming to kids from grade 5 to 7.\n\nREQUIREMENTS:\n* Previous programming experience.\n* 4 hour commitment, from 8:30 AM to 12:30 AM.",[m
+[32m+[m[32m      "imageUrl": "https://images.unsplash.com/photo-1584697964328-b1e7f63dca95?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=max&w=1080&q=80",[m
+[32m+[m[32m      "name": "Kids Programming Day",[m
+[32m+[m[32m      "organizerId": "Hr-40KW",[m
+[32m+[m[32m      "position": {[m
+[32m+[m[32m        "latitude": 51.010801915407036,[m
+[32m+[m[32m        "longitude": -114.07823592424393[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "volunteersNeeded": 2,[m
+[32m+[m[32m      "volunteersIds": [[m
+[32m+[m[32m        "EF-BZ00",[m
+[32m+[m[32m        "Q5bVHgP"[m
+[32m+[m[32m      ][m
+[32m+[m[32m    }[m
+[32m+[m[32m  ],[m
+[32m+[m[32m  "users": [[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Ulla",[m
+[32m+[m[32m        "last": "Ulriksen"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "ulla.ulriksen@example.com",[m
+[32m+[m[32m      "password": "$2a$10$hd96yCeGW794sN8OL7SeMeOGPVEY.wiQDcsHbf5p.Ngtjx93iqjIG",[m
+[32m+[m[32m      "id": "EF-BZ00",[m
+[32m+[m[32m      "mobile": "(910) 862-3167"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Yasemin",[m
+[32m+[m[32m        "last": "Akyüz"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "yasemin.akyuz@example.com",[m
+[32m+[m[32m      "password": "$2a$10$8RRvGY70JK5/Y5jPnltkXOU/wYLhpRcbU48rYzNYx.XDFfqsnkYHm",[m
+[32m+[m[32m      "id": "Q5bVHgP",[m
+[32m+[m[32m      "mobile": "(243) 359-9759"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Luigi",[m
+[32m+[m[32m        "last": "Carluccio"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "luigi@carluccio.it",[m
+[32m+[m[32m      "password": "$2a$10$riZrILdnrgZfM1eymhR6leGdp9Pe3s1MbL6ig5HegPf0QcYImfV22",[m
+[32m+[m[32m      "id": "gpFfX6e",[m
+[32m+[m[32m      "mobile": "(171) 946-2538"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "John",[m
+[32m+[m[32m        "last": "Silva"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "john@silva.com.br",[m
+[32m+[m[32m      "password": "$2a$10$CjzilCJ3NAbs29mPjEJik.gGaD/P4X2.TO5oO7icjSi6lC9Hy..X2",[m
+[32m+[m[32m      "id": "3UN3-2L",[m
+[32m+[m[32m      "mobile": "(563) 589-2999"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Elif",[m
+[32m+[m[32m        "last": "Akşit"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "elif.aksit@example.com",[m
+[32m+[m[32m      "password": "$2a$10$q/LzX.qHhX417ltWwzIvye5kqF331m7N/6COGHYbP9QM5QGKxCGXy",[m
+[32m+[m[32m      "id": "t1aL2Xq",[m
+[32m+[m[32m      "mobile": "(636) 336-9413"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Anne",[m
+[32m+[m[32m        "last": "Van Wingerden"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "anne.vanwingerden@example.com",[m
+[32m+[m[32m      "password": "$2a$10$HmUi8GiOInsWD0Q9ztz.B.5CnXuNb3UDZw4o3T07O2I5O.dMuQj/S",[m
+[32m+[m[32m      "id": "tRHltUh",[m
+[32m+[m[32m      "mobile": "(306) 805-5821"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Gisele",[m
+[32m+[m[32m        "last": "Oliveira"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "gisele.oliveira@example.com",[m
+[32m+[m[32m      "password": "$2a$10$TSTk7KQzNKY21SejLuRTKuSJ4JE1tEKdfL7V8D8Qm4Gc/xDPuQ1nu",[m
+[32m+[m[32m      "id": "3Ohd8sD",[m
+[32m+[m[32m      "mobile": "(905) 491-1184"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Sara",[m
+[32m+[m[32m        "last": "Barnett"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "sara.barnett@example.com",[m
+[32m+[m[32m      "password": "$2a$10$j1e0tTcuBdPmvA9lOh7GSOouun3t6e4oyMk4qewjtXX5kPizyAYZ.",[m
+[32m+[m[32m      "id": "Hr-40KW",[m
+[32m+[m[32m      "mobile": "(710) 271-3339"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Azuma",[m
+[32m+[m[32m        "last": "Gamez"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "password": "$2a$10$nG1wSQFp7.bL1YBnqaE2.uhS8Tt8kzYu6B14NZCImf50SayOzcj8C",[m
+[32m+[m[32m      "email": "azuma.gamez@example.com",[m
+[32m+[m[32m      "id": "elKKrm3",[m
+[32m+[m[32m      "mobile": "(605) 964-2338"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "name": {[m
+[32m+[m[32m        "first": "Eva",[m
+[32m+[m[32m        "last": "Young"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "email": "eva.young@example.com",[m
+[32m+[m[32m      "password": "$2a$10$WdMhnN5qeA3RKlp4uNj23OAIByNltjO635hhxTMSWcV5BAbUNN4RC",[m
+[32m+[m[32m      "id": "ajY8pM2",[m
+[32m+[m[32m      "mobile": "(543) 905-5629"[m
+[32m+[m[32m    },[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "email": "numanbnr4@gmail.com",[m
+[32m+[m[32m      "password": "$2a$10$0CfNnak9aO50gOPtd7JGLO1mcWp6hkM3OiIvNzYLhChmtpxstOjEa",[m
+[32m+[m[32m      "id": "ibgyDDd"[m
+[32m+[m[32m    }[m
+[32m+[m[32m  ][m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/package-lock.json b/package-lock.json[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3772924[m
+[1m--- /dev/null[m
+[1m+++ b/package-lock.json[m
+[36m@@ -0,0 +1,14192 @@[m
+[32m+[m[32m{[m
+[32m+[m[32m    "name": "assignment-task2",[m
+[32m+[m[32m    "lockfileVersion": 3,[m
+[32m+[m[32m    "requires": true,[m
+[32m+[m[32m    "packages": {[m
+[32m+[m[32m        "": {[m
+[32m+[m[32m            "dependencies": {[m
+[32m+[m[32m                "@expo-google-fonts/nunito": "^0.2.2",[m
+[32m+[m[32m                "@expo/react-native-action-sheet": "^4.0.1",[m
+[32m+[m[32m                "@react-native-async-storage/async-storage": "^1.17.11",[m
+[32m+[m[32m                "@react-native-community/datetimepicker": "6.5.2",[m
+[32m+[m[32m                "@react-native-masked-view/masked-view": "0.2.8",[m
+[32m+[m[32m                "@react-navigation/native": "^6.0.16",[m
+[32m+[m[32m                "@react-navigation/stack": "^6.3.7",[m
+[32m+[m[32m                "axios": "^1.2.1",[m
+[32m+[m[32m                "expo": "^47.0.0",[m
+[32m+[m[32m                "expo-constants": "~14.0.2",[m
+[32m+[m[32m                "expo-font": "~11.0.1",[m
+[32m+[m[32m                "expo-image-picker": "~14.0.2",[m
+[32m+[m[32m                "expo-linear-gradient": "~12.0.1",[m
+[32m+[m[32m                "expo-location": "~15.0.1",[m
+[32m+[m[32m                "expo-status-bar": "~1.4.2",[m
+[32m+[m[32m                "expo-updates": "~0.15.6",[m
+[32m+[m[32m                "json-server": "^0.17.1",[m
+[32m+[m[32m                "json-server-auth": "^2.1.0",[m
+[32m+[m[32m                "jwt-decode": "^3.1.2",[m
+[32m+[m[32m                "react": "18.1.0",[m
+[32m+[m[32m                "react-dom": "18.1.0",[m
+[32m+[m[32m                "react-native": "0.70.5",[m
+[32m+[m[32m                "react-native-gesture-handler": "~2.8.0",[m
+[32m+[m[32m                "react-native-get-random-values": "~1.8.0",[m
+[32m+[m[32m                "react-native-image-crop-picker": "^0.41.2",[m
+[32m+[m[32m                "react-native-image-picker": "^7.1.2",[m
+[32m+[m[32m                "react-native-keyboard-aware-scroll-view": "^0.9.5",[m
+[32m+[m[32m                "react-native-loading-spinner-overlay": "^3.0.1",[m
+[32m+[m[32m                "react-native-maps": "1.3.2",[m
+[32m+[m[32m                "react-native-modal-datetime-picker": "^14.0.0",[m
+[32m+[m[32m                "react-native-reanimated": "~2.12.0",[m
+[32m+[m[32m                "react-native-safe-area-context": "4.4.1",[m
+[32m+[m[32m                "react-native-screens": "~3.18.0",[m
+[32m+[m[32m                "react-native-web": "~0.18.7",[m
+[32m+[m[32m                "react-navigation": "^5.0.0",[m
+[32m+[m[32m                "uuid": "^9.0.0"[m
+[32m+[m[32m            },[m
+[32m+[m[32m            "devDependencies": {[m
+[32m+[m[32m      
