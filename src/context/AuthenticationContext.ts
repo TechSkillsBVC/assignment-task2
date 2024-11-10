@@ -7,3 +7,4 @@ export type AuthenticationContextObject = {
 };
 
 export const AuthenticationContext = createContext<AuthenticationContextObject | null>(null);
+

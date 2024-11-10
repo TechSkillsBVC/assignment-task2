@@ -13,7 +13,8 @@ import logoImg from '../images/logo.png';
 import * as api from '../services/api';
 import { getFromCache, setInCache } from '../services/caching';
 import { User } from '../types/User';
-import { isTokenExpired, sanitizeEmail, validateEmail } from '../utils';
+import { isTokenExpired, sanitizeEmail} from '../utils';
+import { validateEmail } from '../utils/validateEmail';
 
 export default function Login({ navigation }: StackScreenProps<any>) {
     const authenticationContext = useContext(AuthenticationContext);
