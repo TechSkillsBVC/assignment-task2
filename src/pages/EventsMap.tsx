@@ -1,3 +1,23 @@
+/**
+ * EventsMap Component
+ * 
+ * This component displays a map with pins representing event locations. 
+ * Users can interact with the map to view events or select locations.
+ * 
+ * Props:
+ * @prop {EventDetails[]} events - Array of event objects to display on the map.
+ * @prop {string} loggedInUser - The name of the logged-in user, displayed in the top left corner.
+ * @prop {Function} onEventSelect - Callback function invoked when an event pin is selected.
+ * @prop {Function} onMapPress - Callback function triggered when the map is pressed (e.g., to drop a pin for creating an event).
+ * 
+ * Capabilities:
+ * - Displays all events as pins on the map.
+ * - Shows the logged-in user’s name in the top-left corner.
+ * - Allows users to tap on a pin to view event details.
+ * - Supports adding a new event location by tapping on the map.
+ * - Offers smooth navigation and interaction for both viewing and creating events.
+ */
+
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -65,7 +85,12 @@ export default function EventsMap(props: StackScreenProps<any>) {
             return mapMarkerImg; // Default for available spots
         }
     };
-
+/**
+ * Logs out the user by removing the user info and access token from AsyncStorage.
+ * Navigates to the Login screen.
+ * @returns {Promise<void>}
+ * @throws {Error} Throws an error if the AsyncStorage operation fails.
+ */
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
             authenticationContext?.setValue(undefined);
@@ -135,6 +160,12 @@ export default function EventsMap(props: StackScreenProps<any>) {
         </View>
     );
 }
+
+/**
+ * Styles for the EventsMap component.
+ * @type {Object}
+ * @property {ViewStyle} container - Style for the main container.
+ */
 
 const styles = StyleSheet.create({
     container: {

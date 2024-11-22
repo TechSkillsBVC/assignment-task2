@@ -1,3 +1,34 @@
+/**
+ * Login Component
+ *
+ * This component manages the login functionality for the Volunteam app. It provides an interface for users to enter their credentials, validates inputs, and authenticates users via the backend API. Upon successful authentication, the user is navigated to the EventsMap page.
+ *
+ * Props:
+ * @prop {StackScreenProps<any>} navigation - Navigation object from React Navigation for handling screen transitions.
+ *
+ * State:
+ * @state {string} email - User-entered email address.
+ * @state {string} password - User-entered password.
+ * @state {boolean} emailIsInvalid - Flag indicating if the email input is invalid.
+ * @state {boolean} passwordIsInvalid - Flag indicating if the password input is invalid.
+ * @state {string | undefined} authError - Error message from the authentication process.
+ * @state {boolean} accessTokenIsValid - Indicates whether a cached access token is valid.
+ * @state {boolean} isAuthenticating - Indicates whether the authentication process is in progress.
+ *
+ * Capabilities:
+ * - Input validation for email and password fields.
+ * - Integration with caching to retrieve and validate a cached user session and access token.
+ * - Secure API calls for user authentication.
+ * - Error handling and user feedback for authentication errors.
+ * - Navigation to the EventsMap page upon successful authentication.
+ *
+ * Responsibilities:
+ * 1. Retrieve and validate cached user and access token data during initial render.
+ * 2. Validate user credentials on form submission.
+ * 3. Display a loading spinner while authenticating.
+ * 4. Provide error feedback for invalid inputs or authentication failures.
+ * 5. Securely cache user and access token data upon successful login.
+ */
 import { useIsFocused } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +47,13 @@ import { User } from '../types/User';
 import { isTokenExpired, sanitizeEmail} from '../utils';
 import { validateEmail } from '../utils/validateEmail';
 
+/**
+ * Login Component
+ * - This component manages the login functionality for the Volunteam app. It provides an interface for users to enter their credentials, validates inputs, and authenticates users via the backend API. Upon successful authentication, the user is navigated to the EventsMap page.
+ * @param {StackScreenProps<any>} navigation - Navigation object from React Navigation for handling screen transitions.
+ * @returns {JSX.Element} - A JSX Element containing the login screen UI.
+ */
+
 export default function Login({ navigation }: StackScreenProps<any>) {
     const authenticationContext = useContext(AuthenticationContext);
     const [email, setEmail] = useState('');
@@ -27,6 +65,11 @@ export default function Login({ navigation }: StackScreenProps<any>) {
     const [accessTokenIsValid, setAccessTokenIsValid] = useState<boolean>(false);
     const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
     const isFocused = useIsFocused();
+
+    /**
+     * Effect: Retrieve cached user info and access token on component mount.
+     * Handles error alerts for authentication issues.
+     */
 
     useEffect(() => {
         getFromCache('userInfo').then(
@@ -44,6 +87,14 @@ export default function Login({ navigation }: StackScreenProps<any>) {
     useEffect(() => {
         if (accessTokenIsValid && authenticationContext?.value) navigation.navigate('EventsMap');
     }, [accessTokenIsValid]);
+
+    /**
+     * Handles the authentication process:
+     * - Validates form inputs.
+     * - Sends API request for authentication.
+     * - Caches user data and access token upon success.
+     * - Handles errors from the API response.
+     */
 
     const handleAuthentication = () => {
         if (formIsValid()) {
@@ -68,11 +119,23 @@ export default function Login({ navigation }: StackScreenProps<any>) {
         }
     };
 
+    /**
+     * Form validation functions:
+     * - formIsValid: Checks if both email and password are valid.
+     * - isPasswordInvalid: Checks if the password input is invalid.
+     * - isEmailInvalid: Checks if the email input is invalid.
+     */
+
     const formIsValid = () => {
         const emailIsValid = !isEmailInvalid();
         const passwordIsValid = !isPasswordInvalid();
         return emailIsValid && passwordIsValid;
     };
+
+    /**
+     * Checks if the password input is invalid.
+     * @returns {boolean} - Returns true if the password is invalid, false otherwise.
+     */
 
     const isPasswordInvalid = (): boolean => {
         const invalidCheck = password.length < 6;
@@ -80,11 +143,24 @@ export default function Login({ navigation }: StackScreenProps<any>) {
         return invalidCheck ? true : false;
     };
 
+    /**
+     * Checks if the email input is invalid.
+     * @returns {boolean} - Returns true if the email is invalid, false otherwise.
+     */
+
     const isEmailInvalid = (): boolean => {
         const invalidCheck = !validateEmail(email);
         setEmailIsInvalid(invalidCheck);
         return invalidCheck ? true : false;
     };
+
+    /**
+     * Renders the login screen UI:
+     * - Linear gradient background.
+     * - Logo image.
+     * - Email and password input fields.
+     * - Login button.
+     */
 
     return (
         <LinearGradient

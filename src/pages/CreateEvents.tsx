@@ -1,3 +1,25 @@
+/**
+ * CreateEvents Component
+ * 
+ * This component provides a form for users to create new events.
+ * Users can:
+ * - Enter event details (name, description, date/time, volunteers needed).
+ * - Select an organizer from a dropdown list.
+ * - Choose a location by dropping a pin on a map.
+ * - Submit the form to save the event.
+ * 
+ * Props:
+ * @prop {Function} onEventCreated - Callback function triggered when a new event is successfully created.
+ * @prop {User[]} organizers - Array of organizer objects available for selection.
+ * @prop {Function} fetchCoordinates - Callback function to retrieve coordinates when a pin is dropped on the map.
+ * 
+ * Capabilities:
+ * - Validates user inputs (e.g., required fields, numeric validation for volunteers needed).
+ * - Fetches a list of organizers from the `/users` endpoint for selection.
+ * - Allows users to select a location on a map.
+ * - Submits event data via an API call and provides success or error feedback.
+ */
+
 import React, { useState,useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -7,6 +29,11 @@ import MapView, { Marker } from 'react-native-maps'; // For map and pin drop fun
 import DateTimePicker from '@react-native-community/datetimepicker'; // For date and time picker
 import { EventDetails } from '../types/Event'; // Import the EventDetails interface
 
+/**
+ *  CreateEvents Component
+ *  - This component provides a form for users to create new events.
+ *  - Users can enter event details, select an organizer, choose a location on a map, and submit the form.
+ */
 export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     const [eventName, setEventName] = useState<string>('');
     const [eventDescription, setEventDescription] = useState<string>('');
@@ -80,6 +107,11 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
         }
     };
 
+    /**
+     * Render the CreateEvents component.
+     * - Displays a form for users to create new events.
+     * - Includes input fields for event details, a dropdown for organizers, and a map for location selection.
+     */
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Add Event</Text>
@@ -179,6 +211,10 @@ export default function CreateEvents({ navigation }: StackScreenProps<any>) {
     );
 }
 
+/**
+ * CreateEvents Styles
+ * - Styles for the CreateEvents component.
+ */
 const styles = StyleSheet.create({
     container: {
         flex: 1,

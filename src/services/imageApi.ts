@@ -14,11 +14,26 @@ import { getEnvironentVariable } from '../utils';
 // When creating your app build or publishing, do not forget to run 'eas secret:push' command
 // to import your secret values to EAS.
 
+/**
+ * Image API instance.
+ */
+
 const imageApi = axios.create({
     baseURL: 'https://api.imgbb.com/1',
     headers: { 'Content-Type': 'multipart/form-data' },
     params: { key: getEnvironentVariable('81d28dc26996812d4cfd6f782b772cb5') },
 });
+
+/**
+ * ImageUploader Class
+ * 
+ * Handles image upload operations to imgbb API.
+ * 
+ * Responsibilities:
+ * - Encodes images in Base64 format.
+ * - Sends images to the imgbb upload endpoint.
+ * - Returns the uploaded image URL.
+ */
 
 export const uploadImage = (imageBase64: string): Promise<AxiosResponse> => {
     const data = new FormData();

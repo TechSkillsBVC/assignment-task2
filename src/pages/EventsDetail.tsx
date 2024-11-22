@@ -1,3 +1,19 @@
+/**
+ * EventDetail Component
+ * 
+ * Props:
+ * @prop {EventDetails} event - The event details object to display.
+ * @prop {Function} onVolunteer - Callback function invoked when the user volunteers for the event.
+ * @prop {Function} onNavigateToMap - Callback function to navigate to the map with the event's location.
+ * Capabilities:
+ * This component displays detailed information about a specific event.
+ * It shows the event image, title, organizer, description, and other key details.
+ * The user can:
+ * - Share the event using the "Share" button.
+ * - Volunteer for the event by clicking "Volunteer".
+ * - Open the event location on a map via the "Map" button.
+*/
+
 import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ActivityIndicator,ScrollView } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
@@ -15,6 +31,12 @@ import { fetchUser } from '../services/api';
 interface RouteParams {
     eventId: string;
 }
+
+/**
+ *  EventDetail Component
+ *  - Displays detailed information about a specific event.
+ *  - Allows users to share the event, volunteer, and view the event location on a map.
+ */
 
 export default function EventsDetail({ route, navigation }: StackScreenProps<{ EventsDetail: RouteParams }, 'EventsDetail'>) {
     const { eventId } = route.params; // Extract eventId from params
@@ -103,6 +125,11 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<{ E
         navigation.navigate('EventsMap' as never);
     };
 
+    /**
+     * Check if the user has already volunteered for the event.
+     * Check if the event is full.
+     * Get the number of volunteers signed up.
+     */
     const userHasVolunteered = userId ? event.volunteersIds.includes(userId) : false;
     const isEventFull = event.volunteersIds.length >= event.volunteersNeeded;
     const volunteersCount = event.volunteersIds.length;
@@ -173,6 +200,11 @@ export default function EventsDetail({ route, navigation }: StackScreenProps<{ E
     );
 }
 
+/**
+ * EventDetail Styles
+ *  - Styles for the EventDetail component.
+ *  - Uses StyleSheet for styling.
+ */
 const styles = StyleSheet.create({
     container: {
         flex: 1,
