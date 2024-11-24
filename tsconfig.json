@@ -10,7 +10,15 @@
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "strict": true
+    "strict": true,
+    "typeRoots": [
+      "./@types",
+      "./node_modules/@types"
+    ],
+    "types": [
+      "@expo/vector-icons",
+      "node"
+    ]
   },
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base.json"
 }
