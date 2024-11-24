@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
+// Polyfill for ReadableStream
+if (typeof global.ReadableStream === 'undefined') {
+    global.ReadableStream = require('readable-stream').Readable;
+}
 
+// Gesture Handler Initialization
+import 'react-native-gesture-handler';
+
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-const { Navigator, Screen } = createStackNavigator();
-
 import Login from '../pages/Login';
 import EventsMap from '../pages/EventsMap';
-import { AuthenticationContext, AuthenticationContextObject } from '../context/AuthenticationContext';
+import { AuthenticationContext } from '../context/AuthenticationContext';
 import { User } from '../types/User';
 
-export default function Routes() {
-    const [authenticatedUser, setAuthenticatedUser] = useState<User>();
+const { Navigator, Screen } = createStackNavigator();
 
-    const authenticationContextObj: AuthenticationContextObject = {
-        value: authenticatedUser as User,
-        setValue: setAuthenticatedUser,
-    };
+export default function Routes() {
+    // Initialize state for authenticated user with null representing unauthenticated
+    const [authenticatedUser, setAuthenticatedUser] = useState<User | null>(null);
 
     return (
-        <AuthenticationContext.Provider value={authenticationContextObj}>
+        <AuthenticationContext.Provider
+            value={{
+                value: authenticatedUser, // Current user
+                setValue: setAuthenticatedUser, // Function to update user
+            }}
+        >
             <NavigationContainer>
                 <Navigator
                     screenOptions={{
@@ -28,7 +36,6 @@ export default function Routes() {
                     }}
                 >
                     <Screen name="Login" component={Login} />
-
                     <Screen name="EventsMap" component={EventsMap} />
                 </Navigator>
             </NavigationContainer>

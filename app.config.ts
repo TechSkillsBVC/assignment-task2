@@ -13,11 +13,23 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         backgroundColor: '#031A62',
     },
     updates: {
-        fallbackToCacheTimeout: 0,
+        fallbackToCacheTimeout: 30000, // Allow a 30-second fallback timeout for updates
     },
     assetBundlePatterns: ['**/*'],
     ios: {
         supportsTablet: true,
+        infoPlist: {
+            LSApplicationQueriesSchemes: ['tel', 'sms', 'maps'], // Allow deep linking to these schemes
+        },
+    },
+    android: {
+        permissions: [
+            'CALL_PHONE',
+            'SEND_SMS',
+            'ACCESS_FINE_LOCATION',
+            'ACCESS_COARSE_LOCATION',
+        ],
+        newArchEnabled: true, // Ensure compatibility with new architecture
     },
     web: {
         favicon: './assets/favicon.png',
@@ -26,8 +38,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         [
             'expo-image-picker',
             {
-                photosPermission: 'The app accesses your photos to let you add them to events.',
-                cameraPermission: 'The app accesses your camera to let you add pictures to events.',
+                photosPermission:
+                    'The app accesses your photos to let you add them to events.',
+                cameraPermission:
+                    'The app accesses your camera to let you add pictures to events.',
             },
         ],
     ],
@@ -35,6 +49,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         eas: {
             projectId: '954f3b8e-1155-4f8f-8601-a2b3126da39e',
         },
-        IMGBB_API_KEY: process.env.IMGBB_API_KEY,
+        IMGBB_API_KEY: config.extra?.IMGBB_API_KEY || '',
     },
 });
