@@ -1,9 +1,10 @@
-import { createContext } from 'react';
-import { User } from '../types/User';
+import { createContext } from "react";
+import { User } from "../types/User";
 
-export type AuthenticationContextObject = {
-    value: User;
-    setValue: (newValue: User | undefined) => void;
-};
+export interface AuthenticationContextObject {
+  value: User | undefined;
+  setValue: React.Dispatch<React.SetStateAction<User | undefined>>;
+}
 
-export const AuthenticationContext = createContext<AuthenticationContextObject | null>(null);
+export const AuthenticationContext =
+  createContext<AuthenticationContextObject | null>(null);
