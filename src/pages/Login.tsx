@@ -45,27 +45,51 @@ export default function Login({ navigation }: StackScreenProps<any>) {
     }, [accessTokenIsValid]);
 
     const handleAuthentication = () => {
-        if (formIsValid()) {
-            setIsAuthenticating(true);
-            api.authenticateUser(sanitizeEmail(email), password)
-                .then((response) => {
-                    setInCache('userInfo', response.data.user);
-                    setInCache('accessToken', response.data.accessToken);
-                    authenticationContext?.setValue(response.data.user);
-                    setIsAuthenticating(false);
-                    123;
-                    navigation.navigate('EventsMap');
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        setAuthError(error.response.data);
-                    } else {
-                        setAuthError('Something went wrong.');
-                    }
-                    setIsAuthenticating(false);
-                });
-        }
-    };
+        // Mock "successful" login so the rest of the app can compute event status
+        // This user exists in mockData.ts (Luigi Carluccio).
+        const mockUser: User = {
+            id: 'gpFfX6e',
+            name: { first: 'Luigi', last: 'Carluccio' },
+            email: 'luigi@carluccio.it',
+            mobile: '(171) 946-2538',
+        };
+
+        // cache like the original flow (optional, but harmless)
+        setInCache('userInfo', mockUser);
+        setInCache('accessToken', 'mock-token');
+
+        authenticationContext?.setValue(mockUser);
+        navigation.navigate('EventsMap');
+        };
+
+
+//     const handleAuthentication = () => {
+//   navigation.navigate("EventsMap");
+// };
+
+
+    // const handleAuthentication = () => {
+    //     if (formIsValid()) {
+    //         setIsAuthenticating(true);
+    //         api.authenticateUser(sanitizeEmail(email), password)
+    //             .then((response) => {
+    //                 setInCache('userInfo', response.data.user);
+    //                 setInCache('accessToken', response.data.accessToken);
+    //                 authenticationContext?.setValue(response.data.user);
+    //                 setIsAuthenticating(false);
+    //                 123;
+    //                 navigation.navigate('EventsMap');
+    //             })
+    //             .catch((error) => {
+    //                 if (error.response) {
+    //                     setAuthError(error.response.data);
+    //                 } else {
+    //                     setAuthError('Something went wrong.');
+    //                 }
+    //                 setIsAuthenticating(false);
+    //             });
+    //     }
+    // };
 
     const formIsValid = () => {
         const emailIsValid = !isEmailInvalid();

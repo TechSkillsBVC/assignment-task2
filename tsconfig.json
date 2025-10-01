@@ -12,5 +12,7 @@
     "resolveJsonModule": true,
     "strict": true
   },
-  "extends": "expo/tsconfig.base"
+  // "extends": "expo/tsconfig.base"
+  "extends": "./node_modules/expo/tsconfig.base"
+
 }

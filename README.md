@@ -1,5 +1,79 @@
 # Volunteam App
 
+## Running the App
+
+1. Install dependencies:
+   ```bash
+   npm install
+
+1-Start Expo:
+npx expo start
+Scan the QR code with Expo Go (on your phone) or press a to open the Android emulator.
+
+2- Login:
+
+For grading/demo: press Log in (login is mocked, no backend required).
+
+You will see the Events Map screen with markers.
+
+
+3-Fake API (Optional – json-server)
+
+If you want to test real login with data from db.json:
+
+a-Find your computer’s IP (ipconfig on Windows).
+
+b-Edit src/services/api.ts → set baseURL:
+export const api = axios.create({
+  baseURL: 'http://<YOUR_IP>:3333',
+});
+
+c-Run json-server with auth:
+npx json-server --watch db.json --port 3333 --host <YOUR_IP> -m ./node_modules/json-server-auth
+
+
+(Optional) Hosted API 
+
+Instead of running json-server, you can point your baseURL to Typicode:
+https://my-json-server.typicode.com/<your-github-username>/<your-forked-repo>
+
+This works in read-only mode.
+
+
+
+Project Structure
+
+App.tsx
+db.json                # fake API data
+src/
+ ├── pages             # Login, EventsMap
+ ├── routes            # AppStack.tsx (navigation)
+ ├── components        # BigButton, Spacer
+ ├── constants         # MapSettings
+ ├── context           # AuthenticationContext
+ ├── services          # api.ts, imageApi.ts
+ └── types             # type declarations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                //original readme file
+<!-- # Volunteam App
+
 ## Setting up the fake API (json-server)
 
 Update the file `src/services/api.ts`.
@@ -35,4 +109,4 @@ When creating your app build or publishing, import your secret values to EAS run
 
 ```
 eas secret:push
-```
+``` -->

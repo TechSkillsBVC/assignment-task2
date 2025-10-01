@@ -1,178 +1,190 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useMemo, useRef, useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import customMapStyle from '../../map-style.json';
+import MapView, { Marker, PROVIDER_GOOGLE, LatLng } from 'react-native-maps';
+import * as Location from 'expo-location';
+
 import * as MapSettings from '../constants/MapSettings';
 import { AuthenticationContext } from '../context/AuthenticationContext';
-import mapMarkerImg from '../images/map-marker.png';
+
+import mapMarkerDefault from '../images/map-marker.png';
+import mapMarkerBlue from '../images/map-marker-blue.png';
+import mapMarkerGrey from '../images/map-marker-grey.png';
+
+import { EVENTS_INITIAL } from '../constants/mockData';
+import { Event } from '../@types/Event';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function EventsMap(props: StackScreenProps<any>) {
-    const { navigation } = props;
-    const authenticationContext = useContext(AuthenticationContext);
-    const mapViewRef = useRef<MapView>(null);
+  const { navigation } = props;
+  const auth = useContext(AuthenticationContext);
+  const currentUserId = auth?.value?.id;
 
-    const handleNavigateToCreateEvent = () => {};
+  const mapViewRef = useRef<MapView>(null);
+  const [events, setEvents] = useState<Event[]>(
+    // exclude past events
+    EVENTS_INITIAL.filter(e => new Date(e.dateTime).getTime() > Date.now())
+  );
 
-    const handleNavigateToEventDetails = () => {};
+  const coords: LatLng[] = useMemo(
+    () =>
+      events.map(e => ({
+        latitude: e.position.latitude,
+        longitude: e.position.longitude,
+      })),
+    [events]
+  );
 
-    const handleLogout = async () => {
-        AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
-            authenticationContext?.setValue(undefined);
-            navigation.navigate('Login');
-        });
-    };
+  const fitAll = useCallback(
+    async (animate = true) => {
+      try {
+        let points: LatLng[] = [...coords];
 
-    return (
-        <View style={styles.container}>
-            <MapView
-                ref={mapViewRef}
-                provider={PROVIDER_GOOGLE}
-                initialRegion={MapSettings.DEFAULT_REGION}
-                style={styles.mapStyle}
-                customMapStyle={customMapStyle}
-                showsMyLocationButton={false}
-                showsUserLocation={true}
-                rotateEnabled={false}
-                toolbarEnabled={false}
-                moveOnMarkerPress={false}
-                mapPadding={MapSettings.EDGE_PADDING}
-                onLayout={() =>
-                    mapViewRef.current?.fitToCoordinates(
-                        events.map(({ position }) => ({
-                            latitude: position.latitude,
-                            longitude: position.longitude,
-                        })),
-                        { edgePadding: MapSettings.EDGE_PADDING }
-                    )
-                }
-            >
-                {events.map((event) => {
-                    return (
-                        <Marker
-                            key={event.id}
-                            coordinate={{
-                                latitude: event.position.latitude,
-                                longitude: event.position.longitude,
-                            }}
-                            onPress={handleNavigateToEventDetails}
-                        >
-                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
-                        </Marker>
-                    );
-                })}
-            </MapView>
+        // try to include user location
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({});
+          points.push({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+        }
 
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
-                <RectButton
-                    style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
-                    onPress={handleNavigateToCreateEvent}
-                >
-                    <Feather name="plus" size={20} color="#FFF" />
-                </RectButton>
-            </View>
-            <RectButton
-                style={[styles.logoutButton, styles.smallButton, { backgroundColor: '#4D6F80' }]}
-                onPress={handleLogout}
-            >
-                <Feather name="log-out" size={20} color="#FFF" />
-            </RectButton>
-        </View>
-    );
+        if (mapViewRef.current && points.length) {
+          mapViewRef.current.fitToCoordinates(points, {
+            edgePadding: MapSettings.EDGE_PADDING,
+            animated: animate,
+          });
+        }
+      } catch {
+        // ignore permission errors; still fit to events
+        if (mapViewRef.current && coords.length) {
+          mapViewRef.current.fitToCoordinates(coords, {
+            edgePadding: MapSettings.EDGE_PADDING,
+            animated: animate,
+          });
+        }
+      }
+    },
+    [coords]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      fitAll();
+    }, [fitAll])
+  );
+
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove(['userInfo', 'accessToken']);
+    auth?.setValue(undefined);
+    navigation.navigate('Login');
+  };
+
+  const handleMarkerPress = (event: Event) => {
+    navigation.navigate('EventDetails', {
+      event,
+      onUpdateEvent: (updated: Event) =>
+        setEvents(prev => prev.map(e => (e.id === updated.id ? updated : e))),
+    });
+  };
+
+  const markerImageFor = (e: Event) => {
+    const isFull = e.volunteersIds.length >= e.volunteersNeeded;
+    const hasApplied = currentUserId ? e.volunteersIds.includes(currentUserId) : false;
+    if (isFull) return mapMarkerGrey;
+    if (hasApplied) return mapMarkerBlue;
+    return mapMarkerDefault;
+  };
+
+  return (
+    <View style={styles.container}>
+      <MapView
+        ref={mapViewRef}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={MapSettings.DEFAULT_REGION}
+        style={styles.mapStyle}
+        showsMyLocationButton={false}
+        showsUserLocation
+        rotateEnabled={false}
+        toolbarEnabled={false}
+        moveOnMarkerPress={false}
+        mapPadding={MapSettings.EDGE_PADDING}
+        onLayout={() => fitAll(false)}
+      >
+        {events.map(event => (
+          <Marker
+            key={event.id}
+            coordinate={{
+              latitude: event.position.latitude,
+              longitude: event.position.longitude,
+            }}
+            onPress={() => handleMarkerPress(event)}
+          >
+            <Image source={markerImageFor(event)} style={{ width: 48, height: 54 }} resizeMode="contain" />
+          </Marker>
+        ))}
+      </MapView>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>{events.length} event(s) found</Text>
+        <RectButton
+          style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
+          onPress={() => {}}
+        >
+          <Feather name="plus" size={20} color="#FFF" />
+        </RectButton>
+      </View>
+
+      <RectButton
+        style={[styles.logoutButton, styles.smallButton, { backgroundColor: '#4D6F80' }]}
+        onPress={handleLogout}
+      >
+        <Feather name="log-out" size={20} color="#FFF" />
+      </RectButton>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...StyleSheet.absoluteFillObject,
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-
-    mapStyle: {
-        ...StyleSheet.absoluteFillObject,
-    },
-
-    logoutButton: {
-        position: 'absolute',
-        top: 70,
-        right: 24,
-
-        elevation: 3,
-    },
-
-    footer: {
-        position: 'absolute',
-        left: 24,
-        right: 24,
-        bottom: 40,
-
-        backgroundColor: '#FFF',
-        borderRadius: 16,
-        height: 56,
-        paddingLeft: 24,
-
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-
-        elevation: 3,
-    },
-
-    footerText: {
-        fontFamily: 'Nunito_700Bold',
-        color: '#8fa7b3',
-    },
-
-    smallButton: {
-        width: 56,
-        height: 56,
-        borderRadius: 16,
-
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  mapStyle: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  logoutButton: {
+    position: 'absolute',
+    top: 70,
+    right: 24,
+    elevation: 3,
+  },
+  footer: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 40,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    height: 56,
+    paddingLeft: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    elevation: 3,
+  },
+  footerText: {
+    fontFamily: 'Nunito_700Bold',
+    color: '#8fa7b3',
+  },
+  smallButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
-
-interface event {
-    id: string;
-    position: {
-        latitude: number;
-        longitude: number;
-    };
-}
-
-const events: event[] = [
-    {
-        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
-        position: {
-            latitude: 51.105761,
-            longitude: -114.106943,
-        },
-    },
-    {
-        id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
-        position: {
-            latitude: 51.04112,
-            longitude: -114.069325,
-        },
-    },
-    {
-        id: 'd7b8ea73-ba2c-4fc3-9348-9814076124bd',
-        position: {
-            latitude: 51.01222958257112,
-            longitude: -114.11677222698927,
-        },
-    },
-    {
-        id: 'd1a6b9ea-877d-4711-b8d7-af8f1bce4d29',
-        position: {
-            latitude: 51.010801915407036,
-            longitude: -114.07823592424393,
-        },
-    },
-];
