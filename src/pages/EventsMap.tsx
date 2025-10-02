@@ -1,23 +1,98 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef } from 'react';
+// import react and helpers
+import React, { useContext, useRef, useEffect } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useFocusEffect } from '@react-navigation/native';
 import customMapStyle from '../../map-style.json';
 import * as MapSettings from '../constants/MapSettings';
 import { AuthenticationContext } from '../context/AuthenticationContext';
 import mapMarkerImg from '../images/map-marker.png';
 
+//api
+import api from '../services/api';
+
+
 export default function EventsMap(props: StackScreenProps<any>) {
     const { navigation } = props;
     const authenticationContext = useContext(AuthenticationContext);
     const mapViewRef = useRef<MapView>(null);
+    
+    //set state for upcoming id 
+    const [upcomingIds, setUpcomingIds] = React.useState<Set<string>>(new Set());
+    
+    // While loading (upcomingIds.size === 0), fall back to showing all.
+    const mapEvents = upcomingIds.size ? events.filter(e => upcomingIds.has(e.id)) : events;
+
+    // listens to the nav focus event 
+    useEffect(() => {
+        // start listening so when screen is focused map is refitted
+        const unsubscribe = navigation.addListener('focus', () => {
+            // refit to include all event coordinates
+            mapViewRef.current?.fitToCoordinates(
+                mapEvents.map(({ position }) => ({
+                    // get latitude for each event
+                    latitude: position.latitude,
+                    // get longitude for each event
+                    longitude: position.longitude,
+                })),
+                // padding so markers are not touching sides of screen
+                { edgePadding: MapSettings.EDGE_PADDING, animated: true }
+            );
+        });
+
+        // stop listening when component unmounts
+        return unsubscribe;
+    }, [navigation]);
+
+
+
+    // refocus to make sure it works when coming back from EventDetails
+    useFocusEffect(
+        React.useCallback(() => {
+            if (!mapViewRef.current) return;
+
+            mapViewRef.current.fitToCoordinates(
+                mapEvents.map(({ position }) => ({
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                })),
+                { edgePadding: MapSettings.EDGE_PADDING, animated: true }
+            );
+        }, [])
+    );
+
+    useEffect(() => {
+        let mounted = true;
+            (async () => {
+                try {
+                const res = await api.get('/events');
+                // hide events from 2022
+                const cutoff = new Date('2023-01-01T00:00:00Z').getTime();
+                const ids = new Set(
+                    (res.data as any[])
+                    .filter((e) => new Date(e.dateTime).getTime() >= cutoff)
+                    .map((e) => e.id)
+                );
+                if (mounted) setUpcomingIds(ids);
+                } catch {
+
+                }
+            })();
+            return () => { mounted = false; };
+            }, []);
+
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
+    // pass id to the function
+    const handleNavigateToEventDetails = (eventId: string) => {
+        // go to EventDetails screen and pass event id
+        navigation.navigate('EventDetails', { eventId });
+    };
 
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
@@ -40,17 +115,32 @@ export default function EventsMap(props: StackScreenProps<any>) {
                 toolbarEnabled={false}
                 moveOnMarkerPress={false}
                 mapPadding={MapSettings.EDGE_PADDING}
+                
+                onMapReady={() => {
+                    // delay so padding applies clean
+                    setTimeout(() => {
+                        mapViewRef.current?.fitToCoordinates(
+                            mapEvents.map(({ position }) => ({
+                                latitude: position.latitude,
+                                longitude: position.longitude,
+                            })),
+                            { edgePadding: MapSettings.EDGE_PADDING, animated: true }
+                        );
+                    }, 120);
+                }}
+
+                // original on layout as backup
                 onLayout={() =>
                     mapViewRef.current?.fitToCoordinates(
-                        events.map(({ position }) => ({
+                        mapEvents.map(({ position }) => ({
                             latitude: position.latitude,
                             longitude: position.longitude,
                         })),
-                        { edgePadding: MapSettings.EDGE_PADDING }
+                        { edgePadding: MapSettings.EDGE_PADDING, animated: true }
                     )
                 }
             >
-                {events.map((event) => {
+                {mapEvents.map((event) => {
                     return (
                         <Marker
                             key={event.id}
@@ -58,7 +148,8 @@ export default function EventsMap(props: StackScreenProps<any>) {
                                 latitude: event.position.latitude,
                                 longitude: event.position.longitude,
                             }}
-                            onPress={handleNavigateToEventDetails}
+                            // send event id on press
+                            onPress={() => handleNavigateToEventDetails(event.id)}
                         >
                             <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
                         </Marker>
@@ -67,7 +158,8 @@ export default function EventsMap(props: StackScreenProps<any>) {
             </MapView>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
+                {/* footer shows actual number of events */}
+                <Text style={styles.footerText}>{mapEvents.length} event(s) found</Text>
                 <RectButton
                     style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
                     onPress={handleNavigateToCreateEvent}
@@ -75,6 +167,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                     <Feather name="plus" size={20} color="#FFF" />
                 </RectButton>
             </View>
+
             <RectButton
                 style={[styles.logoutButton, styles.smallButton, { backgroundColor: '#4D6F80' }]}
                 onPress={handleLogout}
@@ -145,6 +238,7 @@ interface event {
         longitude: number;
     };
 }
+
 
 const events: event[] = [
     {
