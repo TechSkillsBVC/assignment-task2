@@ -11,14 +11,14 @@ import * as MapSettings from "../constants/MapSettings";
 import { AuthenticationContext } from "../context/AuthenticationContext";
 import mapMarkerImg from "../images/map-marker.png";
 
-const apiBase = "http://10.0.0.33:3333"; // your local JSON server
+const apiBase = "http://10.0.0.33:3333";
 
 export default function EventsMap(props: StackScreenProps<any>) {
   const { navigation } = props;
   const authenticationContext = useContext(AuthenticationContext);
   const mapViewRef = useRef<MapView>(null);
 
-  const [eventsList, setEventsList] = useState(events); // start with fallback
+  const [eventsList, setEventsList] = useState(events);
   const [loading, setLoading] = useState(false);
 
   const handleNavigateToCreateEvent = () => {};
@@ -34,7 +34,6 @@ export default function EventsMap(props: StackScreenProps<any>) {
     });
   };
 
-  // ✅ Fetch live events on mount
   useEffect(() => {
     const fetchEvents = async () => {
       try {

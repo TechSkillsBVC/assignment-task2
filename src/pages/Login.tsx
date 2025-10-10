@@ -18,16 +18,12 @@ import { sanitizeEmail, validateEmail } from "../utils";
 
 const apiBase = "http://10.0.0.33:3333";
 
-/* ---------------------------------------------------------
-   API HELPERS — using bcrypt for secure login & registration
------------------------------------------------------------- */
 const authenticateUser = async (email: string, password: string) => {
   const { data } = await axios.get(`${apiBase}/users`);
   const user = data.find((u: any) => u.email === email);
 
   if (!user) throw new Error("USER_NOT_FOUND");
 
-  // Compare plaintext vs hashed password safely
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("INVALID_PASSWORD");
 
@@ -39,7 +35,6 @@ const registerUser = async (email: string, password: string) => {
   const exists = data.some((u: any) => u.email === email);
   if (exists) throw new Error("USER_EXISTS");
 
-  // Hash password before saving
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = {
@@ -54,9 +49,6 @@ const registerUser = async (email: string, password: string) => {
   return newUser;
 };
 
-/* ---------------------------------------------------------
-   COMPONENT
------------------------------------------------------------- */
 export default function LoginBlue({ navigation }: StackScreenProps<any>) {
   const authenticationContext = useContext(AuthenticationContext);
   const [email, setEmail] = useState("");
@@ -67,7 +59,6 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
   const isFocused = useIsFocused();
 
-  // Load cached user (if any)
   useEffect(() => {
     getFromCache("userInfo").then(
       (cachedUserInfo) =>
@@ -76,7 +67,6 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
     );
   }, []);
 
-  // Show error dialogs
   useEffect(() => {
     if (authError) {
       Alert.alert("Authentication Error", authError, [
@@ -97,14 +87,12 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
     const sanitizedEmail = sanitizeEmail(email);
 
     try {
-      // Try login first
       const loginResponse = await authenticateUser(sanitizedEmail, password);
       await saveUserAndToken(loginResponse.user, loginResponse.accessToken);
       navigation.navigate("EventsMap");
     } catch (loginError: any) {
       if (loginError.message === "USER_NOT_FOUND") {
         try {
-          // Register new user
           const newUser = await registerUser(sanitizedEmail, password);
           await saveUserAndToken(newUser, "dummy-token");
           navigation.navigate("EventsMap");
@@ -135,9 +123,6 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
     return invalidCheck;
   };
 
-  /* ---------------------------------------------------------
-     UI
-  ------------------------------------------------------------ */
   return (
     <LinearGradient
       start={{ x: 0.0, y: 0.0 }}
@@ -158,7 +143,6 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
         <Image resizeMode="contain" style={styles.logo} source={logoImg} />
         <Spacer size={80} />
 
-        {/* Email Input */}
         <View style={styles.inputLabelRow}>
           <Text style={styles.label}>Email</Text>
           {emailIsInvalid && <Text style={styles.error}>invalid email</Text>}
@@ -170,7 +154,6 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
           autoCapitalize="none"
         />
 
-        {/* Password Input */}
         <View style={styles.inputLabelRow}>
           <Text style={styles.label}>Password</Text>
           {passwordIsInvalid && (
@@ -201,10 +184,6 @@ export default function LoginBlue({ navigation }: StackScreenProps<any>) {
     </LinearGradient>
   );
 }
-
-/* ---------------------------------------------------------
-   STYLES
------------------------------------------------------------- */
 const styles = StyleSheet.create({
   gradientContainer: { flex: 1 },
   container: { flex: 1 },

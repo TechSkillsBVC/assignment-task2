@@ -36,7 +36,6 @@ export default function EventDetails({ route, navigation }: Props) {
   const isVolunteered = event.volunteersIds.includes(currentUser?.id);
   const isFull = event.volunteersIds.length >= event.volunteersNeeded;
 
-  // 🎨 Status color logic
   let statusColor = "#00A3FF";
   let statusBorder = "#0064B3";
   let statusIcon: keyof typeof Feather.glyphMap = "check";
@@ -56,11 +55,11 @@ export default function EventDetails({ route, navigation }: Props) {
     statusText = `${joined}/${total} joined`;
   }
 
-  // 🧭 Actions
   const openDirections = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${event.position.latitude},${event.position.longitude}`;
     Linking.openURL(url);
   };
+
   const callOrganizer = () => Linking.openURL(`tel:${currentUser?.mobile}`);
   const textOrganizer = () => Linking.openURL(`sms:${currentUser?.mobile}`);
   const shareEvent = () =>
@@ -82,19 +81,19 @@ export default function EventDetails({ route, navigation }: Props) {
 
   return (
     <ScrollView style={styles.container}>
-      {/* === Header Bar === */}
+      {/* Header Bar */}
       <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Feather name="arrow-left" size={24} color="#00A3FF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Event</Text>
-        <View style={{ width: 24 }} /> {/* balance spacing */}
+        <View style={{ width: 24 }} />
       </View>
 
-      {/* === Banner Image === */}
+      {/* Banner */}
       <Image source={{ uri: event.imageUrl }} style={styles.headerImage} />
 
-      {/* === Content === */}
+      {/* Main Content */}
       <View style={styles.content}>
         <Text style={styles.title}>{event.name}</Text>
         <Text style={styles.subtitle}>
@@ -102,9 +101,8 @@ export default function EventDetails({ route, navigation }: Props) {
         </Text>
         <Text style={styles.description}>{event.description}</Text>
 
-        {/* === Two Top Boxes === */}
+        {/* Info Boxes */}
         <View style={styles.row}>
-          {/* Left Column */}
           <View style={styles.column}>
             <LinearGradient
               colors={["#E8F5FF", "#D9EDFF"]}
@@ -114,17 +112,16 @@ export default function EventDetails({ route, navigation }: Props) {
             >
               <Feather name="calendar" size={20} color="#0077CC" />
               <Text style={[styles.infoText, { color: "#031A62" }]}>
-                {new Date(event.dateTime).toLocaleDateString()}
-                {"\n"}
-                {new Date(event.dateTime).toLocaleTimeString([], {
+                {`${new Date(event.dateTime).toLocaleDateString()}\n${new Date(
+                  event.dateTime
+                ).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
-                })}
+                })}`}
               </Text>
             </LinearGradient>
           </View>
 
-          {/* Right Column */}
           <View style={styles.column}>
             <View
               style={[
@@ -143,7 +140,7 @@ export default function EventDetails({ route, navigation }: Props) {
           </View>
         </View>
 
-        {/* === Buttons Section === */}
+        {/* Buttons */}
         {!isFull && (
           <>
             {!isVolunteered ? (
@@ -213,7 +210,7 @@ export default function EventDetails({ route, navigation }: Props) {
         )}
       </View>
 
-      {/* === MAP SECTION === */}
+      {/* Map + Directions */}
       <View style={styles.mapContainer}>
         <MapView
           style={styles.mapStyle}
@@ -237,7 +234,6 @@ export default function EventDetails({ route, navigation }: Props) {
           />
         </MapView>
 
-        {/* spacing between map and button */}
         <View style={{ height: 16 }} />
 
         <TouchableOpacity
@@ -260,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 50, // space for status bar
+    paddingTop: 50,
     paddingBottom: 12,
     borderBottomColor: "#EAEAEA",
     borderBottomWidth: 1,
@@ -270,9 +266,7 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     fontSize: 18,
   },
-
   headerImage: { width: "100%", height: 220 },
-
   content: { padding: 24 },
   title: {
     fontFamily: "Nunito_700Bold",
@@ -338,25 +332,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  routesButton: {
-    backgroundColor: "#031A62",
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  routesText: {
-    fontFamily: "Nunito_700Bold",
-    color: "#FFF",
-    fontSize: 16,
-  },
-
   directionsButton: {
-    backgroundColor: "#4D6F80", // blue-gray
+    backgroundColor: "#4D6F80",
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 14,
   },
-
   directionsText: {
     fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
