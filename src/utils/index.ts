@@ -81,11 +81,28 @@ export const getMapsUrl = (coordinates: LatLng): string => {
 };
 
 export const isTokenExpired = (token: string) => {
-    const decodedToken = jwtDecode(token) as JwtPayload;
-    const currentDate = Date.now();
-    if ((decodedToken.exp as number) * 1000 < currentDate) {
+    try {
+        // Check if token exists and is valid
+        if (!token || typeof token !== 'string' || token.trim() === '') {
+            return true; // Token is invalid, consider it expired
+        }
+        
+        const decodedToken = jwtDecode(token) as JwtPayload;
+        
+        // Check if token has expiration
+        if (!decodedToken.exp) {
+            return true;
+        }
+        
+        const currentDate = Date.now();
+        if ((decodedToken.exp as number) * 1000 < currentDate) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        // If any error occurs, consider token expired
+        console.log('Token validation error:', error);
         return true;
-    } else {
-        return false;
     }
 };

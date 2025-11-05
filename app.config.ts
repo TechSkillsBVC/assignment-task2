@@ -1,4 +1,5 @@
-import { ExpoConfig, ConfigContext } from 'expo/config';
+import { ExpoConfig, ConfigContext } from '@expo/config';
+import 'dotenv/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
@@ -18,6 +19,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     assetBundlePatterns: ['**/*'],
     ios: {
         supportsTablet: true,
+       /*  config: {
+            googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+        }, */
+    },
+    android: {
+        package: 'com.yourcompany.volunteam',
+        config: {
+            googleMaps: {
+                apiKey: process.env.GOOGLE_MAPS_API_KEY,
+            },
+        },
     },
     web: {
         favicon: './assets/favicon.png',
@@ -35,6 +47,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         eas: {
             projectId: '954f3b8e-1155-4f8f-8601-a2b3126da39e',
         },
-        IMGBB_API_KEY: process.env.IMGBB_API_KEY,
+        GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
     },
 });

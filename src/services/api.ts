@@ -1,4 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
+import { Event } from '../types/Event';
+import { User } from '../types/User';
 
 const api = axios.create({
     // Before running your 'json-server', get your computer's IP address and
@@ -11,9 +13,26 @@ const api = axios.create({
     //
     // To use `my-json-server`, make sure your `db.json` is located at the repo root.
 
-    baseURL: 'http://0.0.0.0:3333',
+    baseURL: 'http://10.0.2.2:3333'
+    //baseURL: 'http://192.168.1.250:3333'
 });
 
 export const authenticateUser = (email: string, password: string): Promise<AxiosResponse> => {
     return api.post(`/login`, { email, password });
+};
+
+export const getEvents = (): Promise<AxiosResponse<Event[]>> => {
+    return api.get('/events');
+};
+
+export const getEventById = (id: string): Promise<AxiosResponse<Event>> => {
+    return api.get(`/events/${id}`);
+};
+
+export const getUserById = (id: string): Promise<AxiosResponse<User>> => {
+    return api.get(`/users/${id}`);
+};
+
+export const updateEvent = (id: string, data: Partial<Event>): Promise<AxiosResponse<Event>> => {
+    return api.patch(`/events/${id}`, data);
 };

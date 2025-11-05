@@ -6,6 +6,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Spinner from 'react-native-loading-spinner-overlay';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BigButton from '../components/BigButton';
 import Spacer from '../components/Spacer';
 import { AuthenticationContext } from '../context/AuthenticationContext';
@@ -14,6 +15,7 @@ import * as api from '../services/api';
 import { getFromCache, setInCache } from '../services/caching';
 import { User } from '../types/User';
 import { isTokenExpired, sanitizeEmail, validateEmail } from '../utils';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 export default function Login({ navigation }: StackScreenProps<any>) {
     const authenticationContext = useContext(AuthenticationContext);
@@ -29,41 +31,100 @@ export default function Login({ navigation }: StackScreenProps<any>) {
 
     useEffect(() => {
         getFromCache('userInfo').then(
-            (cachedUserInfo) => authenticationContext?.setValue(cachedUserInfo as User),
-            (error: any) => console.log(error)
+            (cachedUserInfo) => {
+                if (cachedUserInfo) {
+                    authenticationContext?.setValue(cachedUserInfo as User);
+                }
+            },
+            (error: any) => {
+                console.log('Error loading cached user:', error);
+                // Clear invalid cache
+                AsyncStorage.multiRemove(['userInfo', 'accessToken']);
+            }
         );
+        
         getFromCache('accessToken').then(
-            (accessToken) => accessToken && !isTokenExpired(accessToken as string) && setAccessTokenIsValid(true),
-            (error: any) => console.log(error)
+            (accessToken) => {
+                if (accessToken && !isTokenExpired(accessToken as string)) {
+                    setAccessTokenIsValid(true);
+                } else {
+                    // Clear expired token
+                    AsyncStorage.multiRemove(['userInfo', 'accessToken']);
+                }
+            },
+            (error: any) => {
+                console.log('Error loading token:', error);
+                AsyncStorage.multiRemove(['userInfo', 'accessToken']);
+            }
         );
-        if (authError)
-            Alert.alert('Authentication Error', authError, [{ text: 'Ok', onPress: () => setAuthError(undefined) }]);
+        
+        if (authError) {
+            Alert.alert('Authentication Error', authError, [
+                { text: 'Ok', onPress: () => setAuthError(undefined) }
+            ]);
+        }
     }, [authError]);
 
     useEffect(() => {
-        if (accessTokenIsValid && authenticationContext?.value) navigation.navigate('EventsMap');
+        if (accessTokenIsValid && authenticationContext?.value) {
+            navigation.navigate('EventsMap');
+        }
     }, [accessTokenIsValid]);
 
-    const handleAuthentication = () => {
+    const handleAuthentication = async () => {
         if (formIsValid()) {
             setIsAuthenticating(true);
-            api.authenticateUser(sanitizeEmail(email), password)
-                .then((response) => {
-                    setInCache('userInfo', response.data.user);
-                    setInCache('accessToken', response.data.accessToken);
-                    authenticationContext?.setValue(response.data.user);
-                    setIsAuthenticating(false);
-                    123;
-                    navigation.navigate('EventsMap');
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        setAuthError(error.response.data);
-                    } else {
-                        setAuthError('Something went wrong.');
+           try {
+                console.log('=== LOGIN ATTEMPT ===');
+                console.log('Email:', sanitizeEmail(email));
+                console.log('API Base URL:', api.defaults?.baseURL);
+                
+                const response = await api.authenticateUser(sanitizeEmail(email), password);
+                
+                console.log('=== LOGIN SUCCESS ===');
+                console.log('Response:', response.data);
+                
+                await setInCache('userInfo', response.data.user);
+                await setInCache('accessToken', response.data.accessToken);
+                authenticationContext?.setValue(response.data.user);
+                setIsAuthenticating(false);
+                navigation.navigate('EventsMap');
+                
+            } catch (error: any) {
+                console.log('=== LOGIN FAILED ===');
+                console.log('Error object:', error);
+                console.log('Error response:', error.response);
+                console.log('Error request:', error.request);
+                console.log('Error message:', error.message);
+                
+                setIsAuthenticating(false);
+                
+                // Clear any existing cache on login error
+                await AsyncStorage.multiRemove(['userInfo', 'accessToken']);
+                
+                let errorMessage = 'Authentication failed';
+                
+                if (error.response) {
+                    console.log('Response status:', error.response.status);
+                    console.log('Response data:', error.response.data);
+                    
+                    if (typeof error.response.data === 'string') {
+                        errorMessage = error.response.data;
+                    } else if (error.response.data?.message) {
+                        errorMessage = error.response.data.message;
+                    } else if (error.response.status === 400) {
+                        errorMessage = 'Invalid email or password';
+                    } else if (error.response.status === 401) {
+                        errorMessage = 'Incorrect email or password';
                     }
-                    setIsAuthenticating(false);
-                });
+                } else if (error.request) {
+                    errorMessage = 'Cannot connect to server. Please check your network connection.';
+                } else {
+                    errorMessage = error.message || 'Something went wrong';
+                }
+                
+                setAuthError(errorMessage);
+            }
         }
     };
 
@@ -120,6 +181,8 @@ export default function Login({ navigation }: StackScreenProps<any>) {
                     style={[styles.input, emailIsInvalid && styles.invalid]}
                     onChangeText={(value) => setEmail(value)}
                     onEndEditing={isEmailInvalid}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
                 />
 
                 <View style={styles.inputLabelRow}>

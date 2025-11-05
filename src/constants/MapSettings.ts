@@ -5,7 +5,10 @@ export const DEFAULT_POSITION: LatLng = {
     longitude: -114.093,
 };
 
-export const DEFAULT_DELTA = { latitudeDelta: 0.008, longitudeDelta: 0.008 };
+export const DEFAULT_DELTA = { 
+    latitudeDelta: 0.08, 
+    longitudeDelta: 0.08 
+};
 
 export const DEFAULT_REGION: Region = {
     ...DEFAULT_POSITION,
