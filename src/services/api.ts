@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import Constants from 'expo-constants';
 
 const api = axios.create({
     // Before running your 'json-server', get your computer's IP address and
@@ -11,7 +12,7 @@ const api = axios.create({
     //
     // To use `my-json-server`, make sure your `db.json` is located at the repo root.
 
-    baseURL: 'http://0.0.0.0:3333',
+    baseURL: Constants.expoConfig?.extra?.API_URL || 'http://localhost:3333',
 });
 
 export const authenticateUser = (email: string, password: string): Promise<AxiosResponse> => {

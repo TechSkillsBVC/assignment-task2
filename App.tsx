@@ -1,3 +1,6 @@
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 
@@ -24,12 +27,14 @@ export default function App() {
         return null;
     } else {
         return (
-            <>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <SafeAreaProvider>
                 <StatusBar animated translucent style="dark" />
                 <ActionSheetProvider>
                     <AppStack />
                 </ActionSheetProvider>
-            </>
+                </SafeAreaProvider>
+            </GestureHandlerRootView>
         );
     }
 }

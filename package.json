@@ -5,7 +5,10 @@
         "android": "expo start --android",
         "ios": "expo start --ios",
         "web": "expo start --web",
-        "eject": "expo eject"
+        "eject": "expo eject",
+        "typecheck": "tsc --noEmit",
+        "test": "node scripts/test-event-state.cjs",
+        "api": "json-server --watch db.json --port 3333 --host 0.0.0.0 -m ./node_modules/json-server-auth"
     },
     "dependencies": {
         "@expo-google-fonts/nunito": "^0.2.2",

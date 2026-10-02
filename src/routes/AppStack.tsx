@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-const { Navigator, Screen } = createStackNavigator();
+const { Navigator, Screen } = createStackNavigator<RootStackParamList>();
+
+import { RootStackParamList } from './types';
+import EventDetails from '../pages/EventDetails';
+import { EventsProvider } from '../context/EventsContext';
 
 import Login from '../pages/Login';
 import EventsMap from '../pages/EventsMap';
@@ -20,6 +24,7 @@ export default function Routes() {
 
     return (
         <AuthenticationContext.Provider value={authenticationContextObj}>
+            <EventsProvider>
             <NavigationContainer>
                 <Navigator
                     screenOptions={{
@@ -30,8 +35,10 @@ export default function Routes() {
                     <Screen name="Login" component={Login} />
 
                     <Screen name="EventsMap" component={EventsMap} />
+                    <Screen name="EventDetails" component={EventDetails} />
                 </Navigator>
             </NavigationContainer>
+            </EventsProvider>
         </AuthenticationContext.Provider>
     );
 }
