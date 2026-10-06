@@ -1,4 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
+import { Event } from '../types/Event';
+import { User } from '../types/User';
+import { getFromCache } from './caching';
 
 const api = axios.create({
     // Before running your 'json-server', get your computer's IP address and
@@ -11,9 +14,33 @@ const api = axios.create({
     //
     // To use `my-json-server`, make sure your `db.json` is located at the repo root.
 
-    baseURL: 'http://0.0.0.0:3333',
+    baseURL: 'http://192.168.1.65:3333',
+});
+
+// json-server-auth protects /users and /events, so every request carries the
+// access token saved at login.
+api.interceptors.request.use(async (config) => {
+    try {
+        const accessToken = await getFromCache<string>('accessToken');
+        if (accessToken && config.headers) config.headers.Authorization = `Bearer ${accessToken}`;
+    } catch {
+        // No token cached yet (e.g. the login request itself) - send it unauthenticated.
+    }
+    return config;
 });
 
 export const authenticateUser = (email: string, password: string): Promise<AxiosResponse> => {
     return api.post(`/login`, { email, password });
+};
+
+export const getEvents = (): Promise<AxiosResponse<Event[]>> => {
+    return api.get(`/events`);
+};
+
+export const getUserById = (id: string): Promise<AxiosResponse<User>> => {
+    return api.get(`/users/${id}`);
+};
+
+export const updateEventVolunteers = (eventId: string, volunteersIds: string[]): Promise<AxiosResponse<Event>> => {
+    return api.patch(`/events/${eventId}`, { volunteersIds });
 };

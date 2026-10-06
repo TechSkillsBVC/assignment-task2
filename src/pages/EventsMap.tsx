@@ -1,23 +1,77 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef } from 'react';
+import * as Location from 'expo-location';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import customMapStyle from '../../map-style.json';
+import { Colors } from '../constants/Colors';
 import * as MapSettings from '../constants/MapSettings';
 import { AuthenticationContext } from '../context/AuthenticationContext';
+import { EventsContext } from '../context/EventsContext';
+import mapMarkerBlueImg from '../images/map-marker-blue.png';
+import mapMarkerGreyImg from '../images/map-marker-grey.png';
 import mapMarkerImg from '../images/map-marker.png';
+import { EventStatus } from '../types/Event';
+import { getEventStatus, isPastEvent } from '../utils/events';
+
+/** Marker artwork for each event state, matching the design. */
+const markerImages: Record<EventStatus, any> = {
+    open: mapMarkerImg,
+    volunteered: mapMarkerBlueImg,
+    full: mapMarkerGreyImg,
+};
 
 export default function EventsMap(props: StackScreenProps<any>) {
     const { navigation } = props;
     const authenticationContext = useContext(AuthenticationContext);
+    const eventsContext = useContext(EventsContext);
     const mapViewRef = useRef<MapView>(null);
+
+    const [userPosition, setUserPosition] = useState<LatLng>();
+
+    const currentUserId = authenticationContext?.value?.id;
+    const events = eventsContext?.events ?? [];
+
+    // Past events are not shown on the map.
+    const upcomingEvents = useMemo(() => events.filter((event) => !isPastEvent(event)), [events]);
+
+    useEffect(() => {
+        const loadUserPosition = async () => {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== Location.PermissionStatus.GRANTED) return;
+
+            const { coords } = await Location.getCurrentPositionAsync();
+            setUserPosition({ latitude: coords.latitude, longitude: coords.longitude });
+        };
+
+        loadUserPosition();
+    }, []);
+
+    /** Frames the user's location together with every event still open. */
+    const fitMapToEvents = useCallback(() => {
+        const coordinates = upcomingEvents.map(({ position }) => position);
+        if (userPosition) coordinates.push(userPosition);
+        if (!coordinates.length) return;
+
+        mapViewRef.current?.fitToCoordinates(coordinates, { edgePadding: MapSettings.EDGE_PADDING });
+    }, [upcomingEvents, userPosition]);
+
+    // Reposition the map on load and every time the user comes back to this screen.
+    useFocusEffect(
+        useCallback(() => {
+            fitMapToEvents();
+        }, [fitMapToEvents])
+    );
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
+    const handleNavigateToEventDetails = (eventId: string) => {
+        navigation.navigate('EventDetails', { eventId });
+    };
 
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
@@ -40,43 +94,34 @@ export default function EventsMap(props: StackScreenProps<any>) {
                 toolbarEnabled={false}
                 moveOnMarkerPress={false}
                 mapPadding={MapSettings.EDGE_PADDING}
-                onLayout={() =>
-                    mapViewRef.current?.fitToCoordinates(
-                        events.map(({ position }) => ({
-                            latitude: position.latitude,
-                            longitude: position.longitude,
-                        })),
-                        { edgePadding: MapSettings.EDGE_PADDING }
-                    )
-                }
+                onLayout={fitMapToEvents}
             >
-                {events.map((event) => {
+                {upcomingEvents.map((event) => {
+                    const status = getEventStatus(event, currentUserId);
+
                     return (
                         <Marker
                             key={event.id}
-                            coordinate={{
-                                latitude: event.position.latitude,
-                                longitude: event.position.longitude,
-                            }}
-                            onPress={handleNavigateToEventDetails}
+                            coordinate={event.position}
+                            onPress={() => handleNavigateToEventDetails(event.id)}
                         >
-                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
+                            <Image resizeMode="contain" style={styles.marker} source={markerImages[status]} />
                         </Marker>
                     );
                 })}
             </MapView>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
+                <Text style={styles.footerText}>{upcomingEvents.length} event(s) found</Text>
                 <RectButton
-                    style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
+                    style={[styles.smallButton, { backgroundColor: Colors.primary }]}
                     onPress={handleNavigateToCreateEvent}
                 >
                     <Feather name="plus" size={20} color="#FFF" />
                 </RectButton>
             </View>
             <RectButton
-                style={[styles.logoutButton, styles.smallButton, { backgroundColor: '#4D6F80' }]}
+                style={[styles.logoutButton, styles.smallButton, { backgroundColor: Colors.slate }]}
                 onPress={handleLogout}
             >
                 <Feather name="log-out" size={20} color="#FFF" />
@@ -95,6 +140,11 @@ const styles = StyleSheet.create({
 
     mapStyle: {
         ...StyleSheet.absoluteFillObject,
+    },
+
+    marker: {
+        width: 48,
+        height: 54,
     },
 
     logoutButton: {
@@ -125,7 +175,7 @@ const styles = StyleSheet.create({
 
     footerText: {
         fontFamily: 'Nunito_700Bold',
-        color: '#8fa7b3',
+        color: Colors.muted,
     },
 
     smallButton: {
@@ -137,42 +187,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
-interface event {
-    id: string;
-    position: {
-        latitude: number;
-        longitude: number;
-    };
-}
-
-const events: event[] = [
-    {
-        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
-        position: {
-            latitude: 51.105761,
-            longitude: -114.106943,
-        },
-    },
-    {
-        id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
-        position: {
-            latitude: 51.04112,
-            longitude: -114.069325,
-        },
-    },
-    {
-        id: 'd7b8ea73-ba2c-4fc3-9348-9814076124bd',
-        position: {
-            latitude: 51.01222958257112,
-            longitude: -114.11677222698927,
-        },
-    },
-    {
-        id: 'd1a6b9ea-877d-4711-b8d7-af8f1bce4d29',
-        position: {
-            latitude: 51.010801915407036,
-            longitude: -114.07823592424393,
-        },
-    },
-];
