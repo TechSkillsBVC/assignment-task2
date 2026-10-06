@@ -5,9 +5,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const { Navigator, Screen } = createStackNavigator();
 
-import Login from '../pages/Login';
-import EventsMap from '../pages/EventsMap';
 import { AuthenticationContext, AuthenticationContextObject } from '../context/AuthenticationContext';
+import EventsProvider from '../context/EventsProvider';
+import EventDetails from '../pages/EventDetails';
+import EventsMap from '../pages/EventsMap';
+import Login from '../pages/Login';
 import { User } from '../types/User';
 
 export default function Routes() {
@@ -20,18 +22,22 @@ export default function Routes() {
 
     return (
         <AuthenticationContext.Provider value={authenticationContextObj}>
-            <NavigationContainer>
-                <Navigator
-                    screenOptions={{
-                        headerShown: false,
-                        cardStyle: { backgroundColor: '#F2F3F5' },
-                    }}
-                >
-                    <Screen name="Login" component={Login} />
+            <EventsProvider>
+                <NavigationContainer>
+                    <Navigator
+                        screenOptions={{
+                            headerShown: false,
+                            cardStyle: { backgroundColor: '#F2F3F5' },
+                        }}
+                    >
+                        <Screen name="Login" component={Login} />
 
-                    <Screen name="EventsMap" component={EventsMap} />
-                </Navigator>
-            </NavigationContainer>
+                        <Screen name="EventsMap" component={EventsMap} />
+
+                        <Screen name="EventDetails" component={EventDetails} />
+                    </Navigator>
+                </NavigationContainer>
+            </EventsProvider>
         </AuthenticationContext.Provider>
     );
 }
