@@ -17,7 +17,9 @@ export default function EventsMap(props: StackScreenProps<any>) {
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
+    const handleNavigateToEventDetails = (eventId: string) => {
+        navigation.navigate('EventDetails', { eventId });
+    };
 
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
@@ -58,7 +60,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                                 latitude: event.position.latitude,
                                 longitude: event.position.longitude,
                             }}
-                            onPress={handleNavigateToEventDetails}
+                            onPress={() => handleNavigateToEventDetails(event.id)}
                         >
                             <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
                         </Marker>
@@ -147,13 +149,6 @@ interface event {
 }
 
 const events: event[] = [
-    {
-        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
-        position: {
-            latitude: 51.105761,
-            longitude: -114.106943,
-        },
-    },
     {
         id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
         position: {
