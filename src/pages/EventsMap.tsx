@@ -17,8 +17,6 @@ export default function EventsMap(props: StackScreenProps<any>) {
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
-
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
             authenticationContext?.setValue(undefined);
@@ -58,7 +56,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
                                 latitude: event.position.latitude,
                                 longitude: event.position.longitude,
                             }}
-                            onPress={handleNavigateToEventDetails}
+                            onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
                         >
                             <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
                         </Marker>
@@ -67,7 +65,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
             </MapView>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
+                <Text style={styles.footerText}>{events.length} event(s) found</Text>
                 <RectButton
                     style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
                     onPress={handleNavigateToCreateEvent}
