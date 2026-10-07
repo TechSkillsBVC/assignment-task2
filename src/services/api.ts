@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { VolunteerEvent } from '../types/VolunteerEvent';
 
 const api = axios.create({
     // Before running your 'json-server', get your computer's IP address and
@@ -11,9 +12,24 @@ const api = axios.create({
     //
     // To use `my-json-server`, make sure your `db.json` is located at the repo root.
 
-    baseURL: 'http://0.0.0.0:3333',
+    baseURL: 'http://10.0.2.2:3333',
 });
 
 export const authenticateUser = (email: string, password: string): Promise<AxiosResponse> => {
     return api.post(`/login`, { email, password });
+};
+
+export const getEvents = (): Promise<AxiosResponse<VolunteerEvent[]>> => {
+    return api.get('/events');
+};
+
+export const getUser = (userId: string): Promise<AxiosResponse> => {
+    return api.get(`/users/${userId}`);
+};
+
+export const updateEvent = (
+    eventId: string,
+    changes: Partial<VolunteerEvent>
+): Promise<AxiosResponse<VolunteerEvent>> => {
+    return api.patch(`/events/${eventId}`, changes);
 };
