@@ -19,7 +19,7 @@ export const formatAMPM = (date: Date): string => {
     const dateObj = new Date(date);
     const hours = dateObj.getHours();
     const minutes = dateObj.getMinutes();
-    const ampm = hours >= 12 ? 'pm' : 'am';
+    const ampm = hours >= 12 ? 'PM' : 'AM';
     const newHours = hours % 12 ? hours : 12; // the hour '0' should be '12'
     const newMinutes = minutes < 10 ? '0' + minutes : minutes;
     var strTime = newHours + ':' + newMinutes + ' ' + ampm;

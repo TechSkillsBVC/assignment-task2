@@ -3,10 +3,13 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-const { Navigator, Screen } = createStackNavigator();
+import { RootStackParamList } from '../types/Navigation';
+
+const { Navigator, Screen } = createStackNavigator<RootStackParamList>();
 
 import Login from '../pages/Login';
 import EventsMap from '../pages/EventsMap';
+import EventDetails from '../pages/EventDetails';
 import { AuthenticationContext, AuthenticationContextObject } from '../context/AuthenticationContext';
 import { User } from '../types/User';
 
@@ -30,6 +33,20 @@ export default function Routes() {
                     <Screen name="Login" component={Login} />
 
                     <Screen name="EventsMap" component={EventsMap} />
+
+                    <Screen
+                        name="EventDetails"
+                        component={EventDetails}
+                        options={{
+                            headerShown: true,
+                            title: 'Event',
+                            headerTitleAlign: 'center',
+                            headerBackTitleVisible: false,
+                            headerTintColor: '#00A3FF',
+                            headerTitleStyle: { fontFamily: 'Nunito_600SemiBold', fontSize: 15, color: '#8FA7B3' },
+                            headerStyle: { backgroundColor: '#F9FAFC', elevation: 0, shadowOpacity: 0 },
+                        }}
+                    />
                 </Navigator>
             </NavigationContainer>
         </AuthenticationContext.Provider>
