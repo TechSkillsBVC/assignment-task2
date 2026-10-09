@@ -1,23 +1,31 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
+import React, { useCallback, useContext, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import customMapStyle from '../../map-style.json';
-import * as MapSettings from '../constants/MapSettings';
+import EventMapWebView from '../components/EventMapWebView';
 import { AuthenticationContext } from '../context/AuthenticationContext';
-import mapMarkerImg from '../images/map-marker.png';
+import { EventsContext } from '../context/EventsContext';
+import { EventDetail } from '../types/Event';
+
+const EMPTY_EVENTS: EventDetail[] = [];
 
 export default function EventsMap(props: StackScreenProps<any>) {
     const { navigation } = props;
     const authenticationContext = useContext(AuthenticationContext);
-    const mapViewRef = useRef<MapView>(null);
+    const eventsContext = useContext(EventsContext);
+    const events = eventsContext ? eventsContext.events : EMPTY_EVENTS;
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number }>();
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
+    // ADDED: Updated handler to navigate to EventDetails and pass the event ID in route params
+    const handleNavigateToEventDetails = (id: string) => {
+        navigation.navigate('EventDetails', { id });
+    };
 
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
@@ -26,48 +34,59 @@ export default function EventsMap(props: StackScreenProps<any>) {
         });
     };
 
+    const refreshLocation = useCallback(() => {
+        let active = true;
+
+        const loadLocation = async () => {
+            try {
+                const currentPermission = await Location.getForegroundPermissionsAsync();
+                const permission = currentPermission.granted
+                    ? currentPermission
+                    : await Location.requestForegroundPermissionsAsync();
+                if (!active) return;
+
+                if (!permission.granted) {
+                    setUserLocation(undefined);
+                    return;
+                }
+
+                const location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Balanced,
+                });
+                if (active) {
+                    setUserLocation({
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                    });
+                }
+            } catch (error) {
+                console.warn('Unable to load current location; showing all events instead.', error);
+                if (active) {
+                    setUserLocation(undefined);
+                }
+            }
+        };
+
+        void loadLocation();
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    useFocusEffect(refreshLocation);
+
     return (
         <View style={styles.container}>
-            <MapView
-                ref={mapViewRef}
-                provider={PROVIDER_GOOGLE}
-                initialRegion={MapSettings.DEFAULT_REGION}
-                style={styles.mapStyle}
-                customMapStyle={customMapStyle}
-                showsMyLocationButton={false}
-                showsUserLocation={true}
-                rotateEnabled={false}
-                toolbarEnabled={false}
-                moveOnMarkerPress={false}
-                mapPadding={MapSettings.EDGE_PADDING}
-                onLayout={() =>
-                    mapViewRef.current?.fitToCoordinates(
-                        events.map(({ position }) => ({
-                            latitude: position.latitude,
-                            longitude: position.longitude,
-                        })),
-                        { edgePadding: MapSettings.EDGE_PADDING }
-                    )
-                }
-            >
-                {events.map((event) => {
-                    return (
-                        <Marker
-                            key={event.id}
-                            coordinate={{
-                                latitude: event.position.latitude,
-                                longitude: event.position.longitude,
-                            }}
-                            onPress={handleNavigateToEventDetails}
-                        >
-                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
-                        </Marker>
-                    );
-                })}
-            </MapView>
+            <EventMapWebView
+                events={events}
+                currentUserId={authenticationContext?.value?.id}
+                userLocation={userLocation}
+                onSelectEvent={handleNavigateToEventDetails}
+            />
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
+                {/* ADDED: Dynamic event counter based on array length */}
+                <Text style={styles.footerText}>{events.length} event(s) found</Text>
                 <RectButton
                     style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
                     onPress={handleNavigateToCreateEvent}
@@ -87,14 +106,7 @@ export default function EventsMap(props: StackScreenProps<any>) {
 
 const styles = StyleSheet.create({
     container: {
-        ...StyleSheet.absoluteFillObject,
         flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-
-    mapStyle: {
-        ...StyleSheet.absoluteFillObject,
     },
 
     logoutButton: {
@@ -137,42 +149,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
-interface event {
-    id: string;
-    position: {
-        latitude: number;
-        longitude: number;
-    };
-}
-
-const events: event[] = [
-    {
-        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
-        position: {
-            latitude: 51.105761,
-            longitude: -114.106943,
-        },
-    },
-    {
-        id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
-        position: {
-            latitude: 51.04112,
-            longitude: -114.069325,
-        },
-    },
-    {
-        id: 'd7b8ea73-ba2c-4fc3-9348-9814076124bd',
-        position: {
-            latitude: 51.01222958257112,
-            longitude: -114.11677222698927,
-        },
-    },
-    {
-        id: 'd1a6b9ea-877d-4711-b8d7-af8f1bce4d29',
-        position: {
-            latitude: 51.010801915407036,
-            longitude: -114.07823592424393,
-        },
-    },
-];

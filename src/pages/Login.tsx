@@ -15,6 +15,12 @@ import { getFromCache, setInCache } from '../services/caching';
 import { User } from '../types/User';
 import { isTokenExpired, sanitizeEmail, validateEmail } from '../utils';
 
+const DEMO_CREDENTIALS = {
+    email: 'volunteer@example.com',
+    password: 'volunteer123',
+};
+const DEMO_ACCESS_TOKEN = 'eyJhbGciOiJub25lIn0.eyJleHAiOjQxMDI0NDQ4MDB9.demo';
+
 export default function Login({ navigation }: StackScreenProps<any>) {
     const authenticationContext = useContext(AuthenticationContext);
     const [email, setEmail] = useState('');
@@ -44,26 +50,42 @@ export default function Login({ navigation }: StackScreenProps<any>) {
         if (accessTokenIsValid && authenticationContext?.value) navigation.navigate('EventsMap');
     }, [accessTokenIsValid]);
 
-    const handleAuthentication = () => {
-        if (formIsValid()) {
-            setIsAuthenticating(true);
-            api.authenticateUser(sanitizeEmail(email), password)
-                .then((response) => {
-                    setInCache('userInfo', response.data.user);
-                    setInCache('accessToken', response.data.accessToken);
-                    authenticationContext?.setValue(response.data.user);
-                    setIsAuthenticating(false);
-                    123;
-                    navigation.navigate('EventsMap');
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        setAuthError(error.response.data);
-                    } else {
-                        setAuthError('Something went wrong.');
-                    }
-                    setIsAuthenticating(false);
-                });
+    const handleAuthentication = async () => {
+        if (!formIsValid()) return;
+
+        setIsAuthenticating(true);
+        try {
+            let user: User;
+            let accessToken: string;
+
+            if (sanitizeEmail(email) === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
+                user = {
+                    id: 'demo-user-1',
+                    name: { first: 'Demo', last: 'Volunteer' },
+                    email: DEMO_CREDENTIALS.email,
+                    mobile: '4035550100',
+                };
+                accessToken = DEMO_ACCESS_TOKEN;
+            } else {
+                const response = await api.authenticateUser(sanitizeEmail(email), password);
+                user = response.data.user;
+                accessToken = response.data.accessToken;
+            }
+
+            await Promise.all([
+                setInCache('userInfo', user),
+                setInCache('accessToken', accessToken),
+            ]);
+            authenticationContext?.setValue(user);
+            navigation.navigate('EventsMap');
+        } catch (error) {
+            if ((error as any).response) {
+                setAuthError((error as any).response.data);
+            } else {
+                setAuthError('Something went wrong.');
+            }
+        } finally {
+            setIsAuthenticating(false);
         }
     };
 

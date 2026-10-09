@@ -1,0 +1,43 @@
+import { EventDetail } from '../types/Event';
+
+export const INITIAL_EVENTS: EventDetail[] = [
+    {
+        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
+        title: 'Community Cleanup',
+        about: 'Join neighbors to help keep Calgary clean and welcoming.',
+        organizer: 'Calgary Community Association',
+        date: 'Oct 20, 2026',
+        time: '9:00 AM',
+        phone: '4035550101',
+        requiredVolunteers: 10,
+        volunteers: [{ id: 'other-volunteer-1' }],
+        position: { latitude: 51.105761, longitude: -114.106943 },
+        images: [{ id: 'cleanup', url: 'https://s3.ca-central-1.amazonaws.com/ehq-production-canada/fda7241669a373a75eea065d0abb1a4b1806b5b3/original/1606251584/PEBanner_CommunityCleanup-rev.jpg_eac2a9f43bad26e67e80e6f7f6f8a482?1606251584' }],
+    },
+    {
+        id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
+        title: 'Food Distribution',
+        about: 'Calgary Drop-In is recruiting volunteers to help with food distribution.',
+        organizer: 'Robert Last',
+        date: 'Oct 20, 2026',
+        time: '11:00 AM',
+        phone: '4031234567',
+        requiredVolunteers: 10,
+        volunteers: [{ id: 'demo-user-1' }],
+        position: { latitude: 51.04112, longitude: -114.069325 },
+        images: [{ id: 'food-distribution', url: 'https://www.wcchc.com/images/food-distribution/Food-Box.png' }],
+    },
+    {
+        id: 'd7b8ea73-ba2c-4fc3-9348-9814076124bd',
+        title: 'Park Restoration',
+        about: 'Help restore a local park by planting and caring for native plants.',
+        organizer: 'Calgary Parks',
+        date: 'Oct 22, 2026',
+        time: '1:00 PM',
+        phone: '4035550103',
+        requiredVolunteers: 10,
+        volunteers: Array.from({ length: 10 }, (_, index) => ({ id: `park-volunteer-${index + 1}` })),
+        position: { latitude: 51.01222958257112, longitude: -114.11677222698927 },
+        images: [{ id: 'park-restoration', url: 'https://www.jabrennan.com/wp-content/uploads/2012/06/riverview_birds-eye-final-1024x587-1.jpg' }],
+    },
+];
