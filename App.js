@@ -1,6 +1,8 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-
+import { StatusBar } from 'expo-status-bar';
 import {
     useFonts,
     Nunito_400Regular,
@@ -10,7 +12,6 @@ import {
 } from '@expo-google-fonts/nunito';
 
 import AppStack from './src/routes/AppStack';
-import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
     const [fontsLoaded] = useFonts({
@@ -22,14 +23,20 @@ export default function App() {
 
     if (!fontsLoaded) {
         return null;
-    } else {
-        return (
-            <>
-                <StatusBar animated translucent style="dark" />
-                <ActionSheetProvider>
-                    <AppStack />
-                </ActionSheetProvider>
-            </>
-        );
     }
+
+    return (
+        <GestureHandlerRootView style={styles.container}>
+            <StatusBar animated translucent style="dark" />
+            <ActionSheetProvider>
+                <AppStack />
+            </ActionSheetProvider>
+        </GestureHandlerRootView>
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+});

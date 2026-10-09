@@ -1,7 +1,26 @@
 import Constants from 'expo-constants';
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import * as JwtDecodeModule from 'jwt-decode';
 import { Platform } from 'react-native';
 import { LatLng } from 'react-native-maps';
+
+// Safe resolver for jwtDecode across different package versions
+const decodeToken = (token: string): any => {
+    try {
+        if (typeof JwtDecodeModule === 'function') {
+            return (JwtDecodeModule as any)(token);
+        }
+        if ((JwtDecodeModule as any).jwtDecode) {
+            return (JwtDecodeModule as any).jwtDecode(token);
+        }
+        if ((JwtDecodeModule as any).default) {
+            return (JwtDecodeModule as any).default(token);
+        }
+        return {};
+    } catch (e) {
+        console.warn('JWT Decode Error:', e);
+        return {};
+    }
+};
 
 export const formatBytes = (bytes: number, decimals = 2): string => {
     if (!+bytes) return '0 Bytes';
@@ -20,10 +39,9 @@ export const formatAMPM = (date: Date): string => {
     const hours = dateObj.getHours();
     const minutes = dateObj.getMinutes();
     const ampm = hours >= 12 ? 'pm' : 'am';
-    const newHours = hours % 12 ? hours : 12; // the hour '0' should be '12'
+    const newHours = hours % 12 ? hours : 12;
     const newMinutes = minutes < 10 ? '0' + minutes : minutes;
-    var strTime = newHours + ':' + newMinutes + ' ' + ampm;
-    return strTime;
+    return `${newHours}:${newMinutes} ${ampm}`;
 };
 
 export const addHours = (dateTime: Date, hoursToAdd: number) => {
@@ -33,8 +51,7 @@ export const addHours = (dateTime: Date, hoursToAdd: number) => {
 };
 
 export const updateDateWithNewTime = (existingDate: Date, newTime: Date): Date => {
-    const newDate = new Date(new Date(existingDate).setHours(newTime.getHours(), newTime.getMinutes(), 0, 0));
-    return newDate;
+    return new Date(new Date(existingDate).setHours(newTime.getHours(), newTime.getMinutes(), 0, 0));
 };
 
 export const sanitizeEmail = (email: string): string => {
@@ -80,12 +97,10 @@ export const getMapsUrl = (coordinates: LatLng): string => {
     return Platform.OS === 'ios' ? `maps:0,0?q=${label}@${latLng}` : `geo:0,0?q=${latLng}(${label})`;
 };
 
-export const isTokenExpired = (token: string) => {
-    const decodedToken = jwtDecode(token) as JwtPayload;
+export const isTokenExpired = (token: string): boolean => {
+    if (!token) return true;
+    const decodedToken = decodeToken(token);
+    if (!decodedToken || !decodedToken.exp) return true;
     const currentDate = Date.now();
-    if ((decodedToken.exp as number) * 1000 < currentDate) {
-        return true;
-    } else {
-        return false;
-    }
+    return decodedToken.exp * 1000 < currentDate;
 };
