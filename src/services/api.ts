@@ -17,3 +17,13 @@ const api = axios.create({
 export const authenticateUser = (email: string, password: string): Promise<AxiosResponse> => {
     return api.post(`/login`, { email, password });
 };
+
+export const getevents = (): Promise<AxiosResponse> => {
+    return api.get(`/events`);
+}
+export const getuser = (userId: string): Promise<AxiosResponse> => {
+    return api.get(`/users/${userId}`);
+}
+export const updateevent = (eventId: string, updatedEvent: any): Promise<AxiosResponse> => {
+    return api.put(`/events/${eventId}`, updatedEvent);
+}
