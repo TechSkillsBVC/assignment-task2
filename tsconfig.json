@@ -6,11 +6,12 @@
       "dom",
       "esnext"
     ],
-    "moduleResolution": "node",
+        "moduleResolution": "node",
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "strict": true
+    "strict": true,
+    "types": ["node"]
   },
   "extends": "expo/tsconfig.base"
 }
