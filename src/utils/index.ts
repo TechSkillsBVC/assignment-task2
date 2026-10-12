@@ -26,6 +26,11 @@ export const formatAMPM = (date: Date): string => {
     return strTime;
 };
 
+export const formatDate = (date: Date): string => {
+    const [, month, day, year] = new Date(date).toDateString().split(' ');
+    return `${month} ${Number(day)}, ${year}`;
+};
+
 export const addHours = (dateTime: Date, hoursToAdd: number) => {
     const milisecondsToAdd = hoursToAdd * 60 * 60 * 1000;
     const newDate = new Date(dateTime);

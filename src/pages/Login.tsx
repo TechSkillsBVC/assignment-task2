@@ -8,6 +8,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Spinner from 'react-native-loading-spinner-overlay';
 import BigButton from '../components/BigButton';
 import Spacer from '../components/Spacer';
+import * as Colors from '../constants/Colors';
 import { AuthenticationContext } from '../context/AuthenticationContext';
 import logoImg from '../images/logo.png';
 import * as api from '../services/api';
@@ -89,7 +90,7 @@ export default function Login({ navigation }: StackScreenProps<any>) {
         <LinearGradient
             start={{ x: 0.0, y: 0.0 }}
             end={{ x: 1.0, y: 1.0 }}
-            colors={['#031A62', '#00A3FF']}
+            colors={[Colors.NAVY, Colors.BLUE]}
             style={styles.gradientContainer}
         >
             {isFocused && <StatusBar animated translucent style="light" />}
@@ -133,11 +134,16 @@ export default function Login({ navigation }: StackScreenProps<any>) {
                     onEndEditing={isPasswordInvalid}
                 />
                 <Spacer size={80} />
-                <BigButton style={{ marginBottom: 8 }} onPress={handleAuthentication} label="Log in" color="#FF8700" />
+                <BigButton
+                    style={{ marginBottom: 8 }}
+                    onPress={handleAuthentication}
+                    label="Log in"
+                    color={Colors.ORANGE}
+                />
                 <Spinner
                     visible={isAuthenticating}
                     textContent={'Authenticating...'}
-                    overlayColor="#031A62BF"
+                    overlayColor={Colors.NAVY + 'BF'}
                     textStyle={styles.spinnerText}
                 />
             </KeyboardAwareScrollView>
@@ -157,11 +163,11 @@ const styles = StyleSheet.create({
     spinnerText: {
         fontSize: 16,
         fontFamily: 'Nunito_700Bold',
-        color: '#fff',
+        color: Colors.WHITE,
     },
 
     label: {
-        color: '#fff',
+        color: Colors.WHITE,
         fontFamily: 'Nunito_600SemiBold',
         fontSize: 15,
     },
@@ -174,26 +180,26 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.WHITE,
         borderWidth: 1.4,
-        borderColor: '#D3E2E5',
+        borderColor: Colors.GREY_LIGHT,
         borderRadius: 8,
         height: 56,
         paddingTop: 16,
         paddingBottom: 16,
         paddingHorizontal: 24,
         marginBottom: 16,
-        color: '#5C8599',
+        color: Colors.SLATE_LIGHT,
         fontFamily: 'Nunito_600SemiBold',
         fontSize: 15,
     },
 
     invalid: {
-        borderColor: 'red',
+        borderColor: Colors.RED,
     },
 
     error: {
-        color: 'white',
+        color: Colors.WHITE,
         fontFamily: 'Nunito_600SemiBold',
         fontSize: 12,
     },

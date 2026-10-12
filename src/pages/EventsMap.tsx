@@ -1,23 +1,55 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { LatLng, PROVIDER_GOOGLE } from 'react-native-maps';
 import customMapStyle from '../../map-style.json';
+import EventMarker from '../components/EventMarker';
+import * as Colors from '../constants/Colors';
 import * as MapSettings from '../constants/MapSettings';
 import { AuthenticationContext } from '../context/AuthenticationContext';
-import mapMarkerImg from '../images/map-marker.png';
+import * as api from '../services/api';
+import { Event } from '../types/Event';
+import { AppStackParamList } from '../types/Navigation';
+import { getEventStatus } from '../utils/events';
 
-export default function EventsMap(props: StackScreenProps<any>) {
+export default function EventsMap(props: StackScreenProps<AppStackParamList, 'EventsMap'>) {
     const { navigation } = props;
     const authenticationContext = useContext(AuthenticationContext);
     const mapViewRef = useRef<MapView>(null);
+    const [events, setEvents] = useState<Event[]>([]);
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if (isFocused) {
+            api.getUpcomingEvents()
+                .then((response) => {
+                    setEvents(response.data);
+                    fitMapToEventsAndUser(response.data);
+                })
+                .catch((error) => console.log(error));
+        }
+    }, [isFocused]);
+
+    const fitMapToEventsAndUser = async (upcomingEvents: Event[]) => {
+        const coordinates: LatLng[] = upcomingEvents.map(({ position }) => position);
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+            const { coords } = await Location.getCurrentPositionAsync();
+            coordinates.push(coords);
+        }
+        mapViewRef.current?.fitToCoordinates(coordinates, { edgePadding: MapSettings.EDGE_PADDING });
+    };
 
     const handleNavigateToCreateEvent = () => {};
 
-    const handleNavigateToEventDetails = () => {};
+    const handleNavigateToEventDetails = (event: Event) => {
+        navigation.navigate('EventDetails', { event });
+    };
 
     const handleLogout = async () => {
         AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
@@ -40,46 +72,33 @@ export default function EventsMap(props: StackScreenProps<any>) {
                 toolbarEnabled={false}
                 moveOnMarkerPress={false}
                 mapPadding={MapSettings.EDGE_PADDING}
-                onLayout={() =>
-                    mapViewRef.current?.fitToCoordinates(
-                        events.map(({ position }) => ({
-                            latitude: position.latitude,
-                            longitude: position.longitude,
-                        })),
-                        { edgePadding: MapSettings.EDGE_PADDING }
-                    )
-                }
             >
-                {events.map((event) => {
-                    return (
-                        <Marker
-                            key={event.id}
-                            coordinate={{
-                                latitude: event.position.latitude,
-                                longitude: event.position.longitude,
-                            }}
-                            onPress={handleNavigateToEventDetails}
-                        >
-                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
-                        </Marker>
-                    );
-                })}
+                {events.map((event) => (
+                    <EventMarker
+                        key={event.id}
+                        coordinate={event.position}
+                        status={getEventStatus(event, authenticationContext?.value?.id)}
+                        onPress={() => handleNavigateToEventDetails(event)}
+                    />
+                ))}
             </MapView>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
+                <Text style={styles.footerText}>
+                    {events.length} {events.length === 1 ? 'event' : 'events'} found
+                </Text>
                 <RectButton
-                    style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
+                    style={[styles.smallButton, { backgroundColor: Colors.BLUE }]}
                     onPress={handleNavigateToCreateEvent}
                 >
-                    <Feather name="plus" size={20} color="#FFF" />
+                    <Feather name="plus" size={20} color={Colors.WHITE} />
                 </RectButton>
             </View>
             <RectButton
-                style={[styles.logoutButton, styles.smallButton, { backgroundColor: '#4D6F80' }]}
+                style={[styles.logoutButton, styles.smallButton, { backgroundColor: Colors.SLATE }]}
                 onPress={handleLogout}
             >
-                <Feather name="log-out" size={20} color="#FFF" />
+                <Feather name="log-out" size={20} color={Colors.WHITE} />
             </RectButton>
         </View>
     );
@@ -111,7 +130,7 @@ const styles = StyleSheet.create({
         right: 24,
         bottom: 40,
 
-        backgroundColor: '#FFF',
+        backgroundColor: Colors.WHITE,
         borderRadius: 16,
         height: 56,
         paddingLeft: 24,
@@ -125,7 +144,8 @@ const styles = StyleSheet.create({
 
     footerText: {
         fontFamily: 'Nunito_700Bold',
-        color: '#8fa7b3',
+        fontSize: 15,
+        color: Colors.GREY,
     },
 
     smallButton: {
@@ -137,42 +157,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
-interface event {
-    id: string;
-    position: {
-        latitude: number;
-        longitude: number;
-    };
-}
-
-const events: event[] = [
-    {
-        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
-        position: {
-            latitude: 51.105761,
-            longitude: -114.106943,
-        },
-    },
-    {
-        id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
-        position: {
-            latitude: 51.04112,
-            longitude: -114.069325,
-        },
-    },
-    {
-        id: 'd7b8ea73-ba2c-4fc3-9348-9814076124bd',
-        position: {
-            latitude: 51.01222958257112,
-            longitude: -114.11677222698927,
-        },
-    },
-    {
-        id: 'd1a6b9ea-877d-4711-b8d7-af8f1bce4d29',
-        position: {
-            latitude: 51.010801915407036,
-            longitude: -114.07823592424393,
-        },
-    },
-];
