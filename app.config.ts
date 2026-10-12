@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -31,6 +32,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             },
         ],
     ],
+    android: {
+        package: 'com.anonymous.volunteam',
+    config: {
+        googleMaps: {
+            apiKey: process.env.GOOGLE_MAPS_API_KEY || '',
+        },
+    },
+},
     extra: {
         eas: {
             projectId: '954f3b8e-1155-4f8f-8601-a2b3126da39e',

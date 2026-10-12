@@ -14,3 +14,7 @@ web-build/
 
 # environment variables
 .env
+# Local development files
+.vscode/
+Exponent-2.26.6.apk
+android/

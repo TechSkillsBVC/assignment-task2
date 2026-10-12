@@ -1,178 +1,157 @@
-import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StackScreenProps } from '@react-navigation/stack';
-import React, { useContext, useRef } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
-import { RectButton } from 'react-native-gesture-handler';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import customMapStyle from '../../map-style.json';
-import * as MapSettings from '../constants/MapSettings';
-import { AuthenticationContext } from '../context/AuthenticationContext';
-import mapMarkerImg from '../images/map-marker.png';
+import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { StyleSheet, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 
-export default function EventsMap(props: StackScreenProps<any>) {
-    const { navigation } = props;
-    const authenticationContext = useContext(AuthenticationContext);
-    const mapViewRef = useRef<MapView>(null);
+import { getEvents } from '../services/api';
+import { Event } from '../types/Event';
 
-    const handleNavigateToCreateEvent = () => {};
+export default function EventsMap() {
+    const navigation = useNavigation<any>();
+    const [events, setEvents] = useState<Event[]>([]);
 
-    const handleNavigateToEventDetails = () => {};
+    useEffect(() => {
+        getEvents()
+            .then((response) => {
+                const now = new Date();
 
-    const handleLogout = async () => {
-        AsyncStorage.multiRemove(['userInfo', 'accessToken']).then(() => {
-            authenticationContext?.setValue(undefined);
-            navigation.navigate('Login');
-        });
-    };
+                const upcomingEvents = response.data.filter(
+                    (event: Event) => new Date(event.dateTime) > now
+                );
+
+                setEvents(upcomingEvents);
+                console.log('Upcoming events:', upcomingEvents.length);
+            })
+            .catch((error) => {
+                console.log('Error loading events:', error.message);
+            });
+    }, []);
+
+    const eventsForMap = JSON.stringify(
+        events.map((event) => ({
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            latitude: event.position.latitude,
+            longitude: event.position.longitude,
+        }))
+    );
+
+    const mapHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+            <link
+                rel="stylesheet"
+                href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            />
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <style>
+                html, body, #map {
+                    height: 100%;
+                    width: 100%;
+                    margin: 0;
+                    padding: 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="map"></div>
+
+            <script>
+                const events = ${eventsForMap};
+
+                const map = L.map('map').setView(
+                    [51.03, -114.093],
+                    12
+                );
+
+                L.tileLayer(
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    {
+                        attribution: '&copy; OpenStreetMap contributors',
+                        maxZoom: 19
+                    }
+                ).addTo(map);
+
+                events.forEach(function(event) {
+                    const marker = L.marker([
+                        event.latitude,
+                        event.longitude
+                    ]).addTo(map);
+
+                    marker.bindPopup(
+                        '<b>' + event.name + '</b><br>' +
+                        event.description +
+                        '<br><br><b>Tap marker to view details</b>'
+                    );
+
+                    marker.on('click', function() {
+                        window.ReactNativeWebView.postMessage(
+                            String(event.id)
+                        );
+                    });
+                });
+
+                if (events.length > 1) {
+                    const bounds = L.latLngBounds(
+                        events.map(function(event) {
+                            return [
+                                event.latitude,
+                                event.longitude
+                            ];
+                        })
+                    );
+
+                    map.fitBounds(bounds, {
+                        padding: [40, 40],
+                        maxZoom: 13
+                    });
+                }
+            </script>
+        </body>
+        </html>
+    `;
 
     return (
         <View style={styles.container}>
-            <MapView
-                ref={mapViewRef}
-                provider={PROVIDER_GOOGLE}
-                initialRegion={MapSettings.DEFAULT_REGION}
-                style={styles.mapStyle}
-                customMapStyle={customMapStyle}
-                showsMyLocationButton={false}
-                showsUserLocation={true}
-                rotateEnabled={false}
-                toolbarEnabled={false}
-                moveOnMarkerPress={false}
-                mapPadding={MapSettings.EDGE_PADDING}
-                onLayout={() =>
-                    mapViewRef.current?.fitToCoordinates(
-                        events.map(({ position }) => ({
-                            latitude: position.latitude,
-                            longitude: position.longitude,
-                        })),
-                        { edgePadding: MapSettings.EDGE_PADDING }
-                    )
-                }
-            >
-                {events.map((event) => {
-                    return (
-                        <Marker
-                            key={event.id}
-                            coordinate={{
-                                latitude: event.position.latitude,
-                                longitude: event.position.longitude,
-                            }}
-                            onPress={handleNavigateToEventDetails}
-                        >
-                            <Image resizeMode="contain" style={{ width: 48, height: 54 }} source={mapMarkerImg} />
-                        </Marker>
-                    );
-                })}
-            </MapView>
+            <WebView
+                source={{ html: mapHtml }}
+                style={styles.map}
+                originWhitelist={['*']}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                onMessage={(message) => {
+                    const eventId = message.nativeEvent.data;
 
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>X event(s) found</Text>
-                <RectButton
-                    style={[styles.smallButton, { backgroundColor: '#00A3FF' }]}
-                    onPress={handleNavigateToCreateEvent}
-                >
-                    <Feather name="plus" size={20} color="#FFF" />
-                </RectButton>
-            </View>
-            <RectButton
-                style={[styles.logoutButton, styles.smallButton, { backgroundColor: '#4D6F80' }]}
-                onPress={handleLogout}
-            >
-                <Feather name="log-out" size={20} color="#FFF" />
-            </RectButton>
+                    const selectedEvent = events.find(
+                        (event) => event.id === eventId
+                    );
+
+                    if (selectedEvent) {
+                        navigation.navigate('EventDetails', {
+                            event: selectedEvent,
+                        });
+                    }
+                }}
+                onError={(error) => {
+                    console.log(
+                        'Map WebView error:',
+                        error.nativeEvent.description
+                    );
+                }}
+            />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        ...StyleSheet.absoluteFillObject,
         flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
     },
-
-    mapStyle: {
-        ...StyleSheet.absoluteFillObject,
-    },
-
-    logoutButton: {
-        position: 'absolute',
-        top: 70,
-        right: 24,
-
-        elevation: 3,
-    },
-
-    footer: {
-        position: 'absolute',
-        left: 24,
-        right: 24,
-        bottom: 40,
-
-        backgroundColor: '#FFF',
-        borderRadius: 16,
-        height: 56,
-        paddingLeft: 24,
-
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-
-        elevation: 3,
-    },
-
-    footerText: {
-        fontFamily: 'Nunito_700Bold',
-        color: '#8fa7b3',
-    },
-
-    smallButton: {
-        width: 56,
-        height: 56,
-        borderRadius: 16,
-
-        justifyContent: 'center',
-        alignItems: 'center',
+    map: {
+        flex: 1,
     },
 });
-
-interface event {
-    id: string;
-    position: {
-        latitude: number;
-        longitude: number;
-    };
-}
-
-const events: event[] = [
-    {
-        id: 'e3c95682-870f-4080-a0d7-ae8e23e2534f',
-        position: {
-            latitude: 51.105761,
-            longitude: -114.106943,
-        },
-    },
-    {
-        id: '98301b22-2b76-44f1-a8da-8c86c56b0367',
-        position: {
-            latitude: 51.04112,
-            longitude: -114.069325,
-        },
-    },
-    {
-        id: 'd7b8ea73-ba2c-4fc3-9348-9814076124bd',
-        position: {
-            latitude: 51.01222958257112,
-            longitude: -114.11677222698927,
-        },
-    },
-    {
-        id: 'd1a6b9ea-877d-4711-b8d7-af8f1bce4d29',
-        position: {
-            latitude: 51.010801915407036,
-            longitude: -114.07823592424393,
-        },
-    },
-];
